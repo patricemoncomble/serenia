@@ -324,6 +324,16 @@ Qu’est-ce qui te pèse le plus aujourd’hui ?</div>
   <noscript><div class="noscript">SERENIA a besoin de JavaScript pour fonctionner.</div></noscript>
 
   <script src="knowledge-base.js"></script>
+  <script src="knowledge/library-01.js"></script>
+  <script src="knowledge/library-02.js"></script>
+  <script src="knowledge/library-03.js"></script>
+  <script src="knowledge/library-04.js"></script>
+  <script src="knowledge/library-05.js"></script>
+  <script src="knowledge/library-06.js"></script>
+  <script src="knowledge/library-07.js"></script>
+  <script src="knowledge/library-08.js"></script>
+  <script src="knowledge/library-09.js"></script>
+  <script src="knowledge/library-10.js"></script>
   <script>
   (() => {
     "use strict";
@@ -509,6 +519,34 @@ Qu’est-ce qui te pèse le plus aujourd’hui ?</div>
       };
     }
 
+    function libraryMatch(text){
+      const lib = window.SERENIA_LIBRARY || [];
+      if(!lib.length) return null;
+      const n = normalize(text);
+      const words = new Set(n.split(" ").filter(Boolean));
+      let best = null;
+      let bestScore = 0;
+
+      for(const entry of lib){
+        let score = 0;
+        for(const raw of (entry.triggers || [])){
+          const t = normalize(raw);
+          if(!t) continue;
+          if(t.includes(" ")){
+            if(n.includes(t)) score += 8 + Math.min(4, Math.floor(t.length / 12));
+          }else if(words.has(t)){
+            score += t.length >= 7 ? 4 : 2;
+          }
+        }
+        if(state.lastTopic && entry.domain === state.lastTopic) score += 1.5;
+        if(score > bestScore){
+          bestScore = score;
+          best = entry;
+        }
+      }
+      return bestScore >= 4 ? {entry:best,score:bestScore} : null;
+    }
+
     function composeTopicReply(topic){
       const opener = pick(KB.global.gentleOpeners,1);
       const validation = pick(topic.validations,2);
@@ -531,6 +569,18 @@ Qu’est-ce qui te pèse le plus aujourd’hui ?</div>
       if(intent) return {text:intent};
 
       const topic = detectTopic(text);
+      const matched = libraryMatch(text);
+
+      if(matched && (!topic || matched.entry.domain === topic.id || matched.score >= 10)){
+        state.lastTopic = matched.entry.domain;
+        saveState();
+        let textReply = matched.entry.response;
+        if(matched.entry.domain === "violence"){
+          textReply += "\n\nSi tu es en danger immédiat en Belgique, appelle le 112. Si ton téléphone est surveillé, utilise si possible un appareil sûr.";
+        }
+        return {text:textReply};
+      }
+
       if(topic){
         state.lastTopic = topic.id;
         saveState();
