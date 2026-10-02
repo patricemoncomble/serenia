@@ -2,115 +2,629 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>SERENIA</title>
-  <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Foundation&family=Poppins:wght@300;500&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#8068d8">
+  <title>SERENIA — Ton havre de paix intérieur</title>
+  <meta name="description" content="SERENIA est un espace d'écoute et de soutien émotionnel pour mettre des mots sur ce que tu traverses.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Playfair+Display:ital,wght@0,600;1,500&display=swap" rel="stylesheet">
   <style>
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Poppins', sans-serif;
-      min-height: 100vh;
-      background: linear-gradient(135deg, #f78fb3 0%, #70a1ff 100%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
+    :root{
+      --ink:#25213a;
+      --muted:#716b86;
+      --panel:rgba(255,255,255,.78);
+      --line:rgba(84,67,130,.12);
+      --purple:#745fc8;
+      --purple-dark:#57439f;
+      --pink:#d886a8;
+      --soft:#f7f4ff;
+      --shadow:0 24px 70px rgba(69,48,115,.16);
     }
-
-    h1 {
-      font-family: 'Edu NSW ACT Foundation', cursive;
-      font-size: 64px;
-      font-weight: 400;
-      color: #ffffff;
-      text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.2);
-      margin-bottom: 10px;
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:"DM Sans",sans-serif;
+      color:var(--ink);
+      background:
+        radial-gradient(circle at 12% 8%, rgba(255,206,226,.92), transparent 34%),
+        radial-gradient(circle at 92% 15%, rgba(194,211,255,.9), transparent 36%),
+        radial-gradient(circle at 55% 100%, rgba(220,207,255,.78), transparent 40%),
+        linear-gradient(135deg,#fff7fb 0%,#f4f3ff 48%,#eff6ff 100%);
+      overflow-x:hidden;
     }
-
-    p {
-      font-size: 20px;
-      color: #f0f0f0;
-      margin-bottom: 30px;
-      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+    body::before,body::after{
+      content:"";
+      position:fixed;
+      border-radius:50%;
+      filter:blur(8px);
+      pointer-events:none;
+      z-index:0;
     }
-
-    input[type="text"] {
-      width: 60%;
-      max-width: 600px;
-      padding: 15px 20px;
-      font-size: 18px;
-      border-radius: 30px;
-      border: none;
-      outline: none;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    body::before{width:240px;height:240px;background:rgba(255,255,255,.42);left:-80px;bottom:12%}
+    body::after{width:300px;height:300px;background:rgba(255,255,255,.34);right:-120px;top:35%}
+    .shell{
+      width:min(980px,calc(100% - 28px));
+      min-height:100vh;
+      margin:0 auto;
+      padding:32px 0 24px;
+      display:flex;
+      flex-direction:column;
+      position:relative;
+      z-index:1;
     }
-
-    .buttons {
-      margin-top: 20px;
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
+      margin-bottom:18px;
+      padding:0 4px;
     }
-
-    button {
-      padding: 12px 25px;
-      font-size: 16px;
-      border-radius: 25px;
-      border: none;
-      background-color: #ffffff;
-      color: #5a67d8;
-      cursor: pointer;
-      margin: 0 10px;
-      transition: all 0.3s ease;
+    .brand{display:flex;align-items:center;gap:13px}
+    .logo{
+      width:47px;height:47px;border-radius:16px;
+      display:grid;place-items:center;
+      background:linear-gradient(145deg,#8d78dc,#cf88b2);
+      color:white;font-size:21px;
+      box-shadow:0 10px 26px rgba(101,74,170,.25);
     }
-
-    button:hover {
-      background-color: #f3f3f3;
+    .brand h1{
+      margin:0;
+      font-family:"Playfair Display",serif;
+      font-size:30px;
+      letter-spacing:.08em;
+      font-weight:600;
     }
-
-    #response {
-      display: none;
+    .brand small{display:block;color:var(--muted);font-size:12px;margin-top:2px;letter-spacing:.02em}
+    .privacy-pill{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.56);
+      color:var(--muted);
+      padding:9px 12px;
+      border-radius:999px;
+      font-size:12px;
+      white-space:nowrap;
+      backdrop-filter:blur(12px);
+    }
+    .card{
+      background:var(--panel);
+      border:1px solid rgba(255,255,255,.72);
+      border-radius:30px;
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(22px);
+      overflow:hidden;
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      min-height:690px;
+    }
+    .intro{
+      padding:33px 34px 22px;
+      border-bottom:1px solid var(--line);
+    }
+    .intro h2{
+      font-family:"Playfair Display",serif;
+      font-size:clamp(28px,4vw,44px);
+      line-height:1.08;
+      margin:0 0 11px;
+      font-weight:600;
+    }
+    .intro h2 em{font-weight:500;color:var(--purple-dark)}
+    .intro p{
+      margin:0;
+      color:var(--muted);
+      max-width:720px;
+      font-size:15px;
+      line-height:1.6;
+    }
+    .topics{
+      display:flex;gap:8px;overflow-x:auto;
+      padding:15px 28px 13px;
+      scrollbar-width:none;
+      border-bottom:1px solid var(--line);
+    }
+    .topics::-webkit-scrollbar{display:none}
+    .chip{
+      flex:0 0 auto;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.68);
+      color:#5d5770;
+      border-radius:999px;
+      padding:8px 12px;
+      font:500 12px "DM Sans",sans-serif;
+      cursor:pointer;
+      transition:.2s ease;
+    }
+    .chip:hover{transform:translateY(-1px);background:#fff;color:var(--purple-dark)}
+    .conversation{
+      flex:1;
+      overflow-y:auto;
+      padding:25px 28px 12px;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      scroll-behavior:smooth;
+      min-height:330px;
+      max-height:52vh;
+    }
+    .message{
+      max-width:min(78%,680px);
+      padding:13px 16px;
+      border-radius:19px;
+      line-height:1.55;
+      font-size:14px;
+      white-space:pre-wrap;
+      animation:rise .22s ease-out;
+    }
+    @keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+    .message.user{
+      align-self:flex-end;
+      background:linear-gradient(145deg,#8068d8,#6952bc);
+      color:white;
+      border-bottom-right-radius:6px;
+      box-shadow:0 8px 22px rgba(92,70,161,.17);
+    }
+    .message.bot{
+      align-self:flex-start;
+      background:#fff;
+      color:#363048;
+      border:1px solid var(--line);
+      border-bottom-left-radius:6px;
+      box-shadow:0 7px 20px rgba(74,62,111,.07);
+    }
+    .message.crisis{
+      max-width:min(92%,760px);
+      background:#fff7f8;
+      border:1px solid rgba(181,65,82,.18);
+      box-shadow:0 7px 20px rgba(143,55,72,.08);
+    }
+    .resource-actions{
+      display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;
+    }
+    .resource-actions a{
+      text-decoration:none;
+      padding:8px 11px;border-radius:10px;
+      background:#fff;color:#7d3343;
+      border:1px solid rgba(157,54,76,.18);
+      font-size:12px;font-weight:600;
+    }
+    .typing{
+      display:none;
+      align-self:flex-start;
+      padding:11px 15px;
+      background:#fff;border:1px solid var(--line);
+      border-radius:18px 18px 18px 6px;
+      color:#9991a8;font-size:13px;
+    }
+    .typing.show{display:block}
+    .composer-wrap{
+      padding:14px 20px 18px;
+      border-top:1px solid var(--line);
+      background:rgba(255,255,255,.38);
+    }
+    .composer{
+      display:flex;align-items:flex-end;gap:9px;
+      border:1px solid rgba(88,70,136,.14);
+      background:white;
+      border-radius:22px;
+      padding:8px 8px 8px 15px;
+      box-shadow:0 9px 28px rgba(62,49,100,.08);
+    }
+    textarea{
+      flex:1;border:0;outline:0;resize:none;
+      min-height:43px;max-height:130px;
+      padding:10px 2px 7px;
+      font:400 15px/1.45 "DM Sans",sans-serif;
+      color:var(--ink);background:transparent;
+    }
+    textarea::placeholder{color:#aaa4b5}
+    .icon-btn,.send-btn{
+      border:0;cursor:pointer;display:grid;place-items:center;
+      transition:.2s ease;
+    }
+    .icon-btn{
+      width:43px;height:43px;border-radius:14px;
+      background:#f4f1fb;color:var(--purple-dark);font-size:18px;
+    }
+    .send-btn{
+      min-width:48px;height:43px;border-radius:14px;
+      background:linear-gradient(145deg,#8068d8,#6c54c0);
+      color:white;font-size:18px;
+      box-shadow:0 7px 17px rgba(95,72,164,.22);
+    }
+    .icon-btn:hover,.send-btn:hover{transform:translateY(-1px)}
+    .icon-btn.listening{background:#ffe8ef;color:#b43d61;animation:pulse 1s infinite}
+    @keyframes pulse{50%{transform:scale(.94)}}
+    .composer-meta{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      margin-top:9px;padding:0 4px;
+      color:#8c8699;font-size:11px;
+    }
+    .clear-btn{
+      border:0;background:none;color:#8c8699;
+      font:500 11px "DM Sans",sans-serif;cursor:pointer;padding:2px 0;
+    }
+    .clear-btn:hover{color:var(--purple-dark)}
+    footer{
+      text-align:center;color:#8b8599;
+      font-size:11px;line-height:1.5;
+      padding:17px 16px 0;
+    }
+    footer strong{color:#676176;font-weight:600}
+    .noscript{
+      margin:20px;padding:14px;background:#fff3f3;border-radius:12px;color:#7d3343
+    }
+    @media(max-width:680px){
+      .shell{width:100%;padding:0}
+      header{padding:17px 17px 13px;margin:0}
+      .privacy-pill{display:none}
+      .brand h1{font-size:25px}.logo{width:42px;height:42px}
+      .card{border-radius:26px 26px 0 0;min-height:calc(100vh - 74px);box-shadow:none;border-left:0;border-right:0;border-bottom:0}
+      .intro{padding:27px 20px 18px}.intro p{font-size:14px}
+      .topics{padding:12px 18px}
+      .conversation{padding:20px 17px 10px;max-height:none}
+      .message{max-width:88%;font-size:14px}
+      .composer-wrap{padding:12px 12px 15px}
+      footer{display:none}
     }
   </style>
 </head>
-<body>
-  <h1>SERENIA</h1>
-  <p>Ton havre de paix intérieur</p>
-  <input type="text" id="userInput" placeholder="Exprime ce que tu ressens..." />
-  <div class="buttons">
-    <button onclick="sendMessage()">Envoyer</button>
-    <button onclick="startVoiceInput()">🎤 Parler</button>
-  </div>
-  <div id="response"></div>
+<body id="top">
+  <div class="shell">
+    <header>
+      <div class="brand">
+        <div class="logo" aria-hidden="true">✦</div>
+        <div>
+          <h1>SERENIA</h1>
+          <small>Ton havre de paix intérieur</small>
+        </div>
+      </div>
+      <div class="privacy-pill">🔒 Rien n’est envoyé à un serveur</div>
+    </header>
 
+    <main class="card">
+      <section class="intro">
+        <h2>Dépose ce qui <em>pèse.</em></h2>
+        <p>Rupture, solitude, peur, conflit, pensées en boucle… Écris comme ça vient. SERENIA t’aide à mettre des mots, prendre du recul et trouver une prochaine petite étape.</p>
+      </section>
+
+      <div class="topics" id="topics" aria-label="Sujets fréquents"></div>
+
+      <section class="conversation" id="conversation" aria-live="polite">
+        <div class="message bot">Bonjour. Je suis SERENIA. 🌿
+
+Tu peux me parler librement de ce que tu traverses. Je ne vais pas te juger, et tu n’as pas besoin de trouver les bons mots.
+
+Qu’est-ce qui te pèse le plus aujourd’hui ?</div>
+        <div class="typing" id="typing">SERENIA réfléchit…</div>
+      </section>
+
+      <div class="composer-wrap">
+        <div class="composer">
+          <textarea id="userInput" rows="1" maxlength="1400" placeholder="Exprime ce que tu ressens…" aria-label="Ton message"></textarea>
+          <button class="icon-btn" id="voiceBtn" type="button" title="Parler" aria-label="Parler">🎤</button>
+          <button class="send-btn" id="sendBtn" type="button" title="Envoyer" aria-label="Envoyer">➜</button>
+        </div>
+        <div class="composer-meta">
+          <span>Conversation conservée uniquement sur cet appareil.</span>
+          <button class="clear-btn" id="clearBtn" type="button">Effacer la conversation</button>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <strong>SERENIA est un outil de soutien émotionnel, pas un professionnel de santé.</strong>
+      En cas de danger immédiat en Belgique, appelle le 112. Ligne de prévention du suicide Belgique francophone : 0800 32 123.
+    </footer>
+  </div>
+
+  <noscript><div class="noscript">SERENIA a besoin de JavaScript pour fonctionner.</div></noscript>
+
+  <script src="knowledge-base.js"></script>
   <script>
-    async function sendMessage() {
-      const userInput = document.getElementById('userInput').value;
-      const responseDiv = document.getElementById('response');
-      const res = await fetch('/chat', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ message: userInput })
-      });
-      const data = await res.json();
-      responseDiv.innerText = data.reply;
+  (() => {
+    "use strict";
+    const KB = window.SERENIA_KB;
+    const input = document.getElementById("userInput");
+    const sendBtn = document.getElementById("sendBtn");
+    const voiceBtn = document.getElementById("voiceBtn");
+    const clearBtn = document.getElementById("clearBtn");
+    const conversation = document.getElementById("conversation");
+    const typing = document.getElementById("typing");
+    const topicsEl = document.getElementById("topics");
+    const STORAGE_KEY = "serenia_conversation_v1";
+    const STATE_KEY = "serenia_state_v1";
+
+    const state = loadState();
+    let turns = loadTurns();
+
+    function normalize(text){
+      return text.toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+        .replace(/[’']/g," ")
+        .replace(/[^a-z0-9àâçéèêëîïôûùüÿñæœ\s-]/gi," ")
+        .replace(/\s+/g," ").trim();
     }
 
-    function startVoiceInput() {
-      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-      recognition.lang = 'fr-FR';
+    function escapeText(text){
+      const d = document.createElement("div");
+      d.textContent = text;
+      return d.textContent;
+    }
+
+    function pick(arr, salt=0){
+      if(!arr || !arr.length) return "";
+      const idx = Math.abs((state.turnCount || 0) + salt) % arr.length;
+      return arr[idx];
+    }
+
+    function hasAny(text, patterns){
+      return patterns.some(p => text.includes(normalize(p)));
+    }
+
+    function renderTopics(){
+      const preferred = ["rupture","ghosting","solitude","anxiete","conflit","jalousie","rumination","besoin_parler"];
+      preferred.forEach(id => {
+        const t = KB.topics.find(x => x.id === id);
+        if(!t) return;
+        const b = document.createElement("button");
+        b.className = "chip";
+        b.type = "button";
+        b.textContent = t.icon + " " + t.label;
+        b.addEventListener("click", () => {
+          input.value = topicPrompt(t.id);
+          autoResize();
+          input.focus();
+        });
+        topicsEl.appendChild(b);
+      });
+    }
+
+    function topicPrompt(id){
+      const prompts = {
+        rupture:"Je vis une rupture et j’ai du mal à gérer ce que je ressens.",
+        ghosting:"Cette personne ne me répond plus et ce silence me fait souffrir.",
+        solitude:"Je me sens vraiment seul·e en ce moment.",
+        anxiete:"Je suis très angoissé·e et mes pensées tournent en boucle.",
+        conflit:"Je viens d’avoir une grosse dispute avec quelqu’un que j’aime.",
+        jalousie:"Je ressens beaucoup de jalousie et ça me fait souffrir.",
+        rumination:"Je n’arrive pas à arrêter de penser à la même chose.",
+        besoin_parler:"J’ai besoin de parler. Ça ne va pas fort."
+      };
+      return prompts[id] || "J’ai besoin de parler de " + id + ".";
+    }
+
+    function addMessage(role, text, opts={}){
+      const el = document.createElement("div");
+      el.className = "message " + (role === "user" ? "user" : "bot") + (opts.crisis ? " crisis" : "");
+      el.textContent = text;
+      if(opts.resources){
+        const actions = document.createElement("div");
+        actions.className = "resource-actions";
+        const a1 = document.createElement("a");
+        a1.href = "tel:112";
+        a1.textContent = "📞 Appeler le 112";
+        const a2 = document.createElement("a");
+        a2.href = "tel:080032123";
+        a2.textContent = "🫶 0800 32 123";
+        actions.append(a1,a2);
+        el.appendChild(actions);
+      }
+      conversation.insertBefore(el, typing);
+      requestAnimationFrame(() => {
+        conversation.scrollTop = conversation.scrollHeight;
+      });
+      return el;
+    }
+
+    function saveTurn(role,text){
+      turns.push({role,text,at:Date.now()});
+      if(turns.length > 40) turns = turns.slice(-40);
+      try{localStorage.setItem(STORAGE_KEY,JSON.stringify(turns));}catch(e){}
+    }
+
+    function saveState(){
+      try{localStorage.setItem(STATE_KEY,JSON.stringify(state));}catch(e){}
+    }
+
+    function loadTurns(){
+      try{return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];}catch(e){return []}
+    }
+
+    function loadState(){
+      try{return JSON.parse(localStorage.getItem(STATE_KEY)) || {turnCount:0,lastTopic:null};}
+      catch(e){return {turnCount:0,lastTopic:null};}
+    }
+
+    function restoreConversation(){
+      if(!turns.length) return;
+      const initial = conversation.querySelector(".message.bot");
+      if(initial) initial.remove();
+      turns.forEach(t => addMessage(t.role,t.text));
+    }
+
+    function scoreTopic(n, topic){
+      let score = 0;
+      topic.keywords.forEach(k => {
+        const key = normalize(k);
+        if(!key) return;
+        if(n.includes(key)){
+          score += key.includes(" ") ? 5 : 2;
+          if(key.length > 10) score += 1;
+        }
+      });
+      if(state.lastTopic === topic.id) score += 0.75;
+      return score;
+    }
+
+    function detectTopic(text){
+      const n = normalize(text);
+      const ranked = KB.topics.map(t => ({topic:t,score:scoreTopic(n,t)}))
+        .sort((a,b)=>b.score-a.score);
+      return ranked[0].score > 0 ? ranked[0].topic : null;
+    }
+
+    function detectEmergency(text){
+      const n = normalize(text);
+      if(hasAny(n, KB.emergency.highRiskPatterns)) return "high";
+      if(hasAny(n, KB.emergency.selfHarmPatterns)) return "selfharm";
+      if(hasAny(n, KB.emergency.concernPatterns)) return "concern";
+      return null;
+    }
+
+    function conversationalIntent(text){
+      const n = normalize(text);
+      if(/^(bonjour|salut|hello|coucou|bonsoir|hey)\b/.test(n) && n.split(" ").length < 6){
+        return "Bonjour. 🌿 Je suis là. Tu peux commencer simplement : qu’est-ce qui est le plus lourd pour toi aujourd’hui ?";
+      }
+      if(/^(merci|merci beaucoup|thanks|c est gentil)$/.test(n)){
+        return "Avec plaisir. Prends les choses une étape à la fois. Si tu veux continuer, dis-moi simplement ce qui reste le plus difficile maintenant.";
+      }
+      if(/^(oui|ouais|ok|d accord|non|pas vraiment)$/.test(n) && state.lastTopic){
+        const t = KB.topics.find(x => x.id === state.lastTopic);
+        if(t) return pick(t.followups,2);
+      }
+      return null;
+    }
+
+    function crisisReply(level){
+      if(level === "high"){
+        return {
+          text:"Ce que tu viens d’écrire me fait penser que tu pourrais être en danger maintenant. Ne reste pas seul·e avec ça. Éloigne-toi de tout ce que tu pourrais utiliser pour te faire du mal et va vers une personne réelle, tout de suite si tu peux.\n\nSi tu es en Belgique et qu’un passage à l’acte est possible ou imminent, appelle le 112. Tu peux aussi appeler le 0800 32 123, ligne gratuite et anonyme de prévention du suicide en Belgique francophone, 24h/24 et 7j/7.\n\nSi tu es ailleurs, contacte les services d’urgence de ton pays ou une ligne de crise locale. L’objectif maintenant n’est pas de tout résoudre : c’est de te garder en sécurité pendant les prochaines minutes.",
+          resources:true
+        };
+      }
+      if(level === "selfharm"){
+        return {
+          text:"Je prends ce que tu dis au sérieux. Si tu risques de te faire du mal maintenant, mets de la distance entre toi et ce que tu pourrais utiliser, et rapproche-toi d’une personne de confiance ou d’un lieu où tu n’es pas seul·e.\n\nEn Belgique, si le danger est immédiat : 112. Pour parler anonymement avec une personne formée à la crise suicidaire : 0800 32 123, 24h/24 et 7j/7.\n\nPour l’instant, concentre-toi uniquement sur la sécurité et les prochaines minutes.",
+          resources:true
+        };
+      }
+      return {
+        text:"Tu sembles arriver à un niveau de souffrance où il est important de ne pas rester seul·e. Je peux continuer à t’écouter ici, mais une présence humaine compte vraiment maintenant.\n\nEn Belgique francophone, tu peux appeler gratuitement et anonymement le 0800 32 123, 24h/24 et 7j/7. Si tu penses que tu pourrais te faire du mal ou que ta vie est en danger, appelle le 112.\n\nDans l’immédiat, rapproche-toi si possible d’une personne sûre et reste dans un endroit où tu n’es pas isolé·e.",
+        resources:true
+      };
+    }
+
+    function composeTopicReply(topic){
+      const opener = pick(KB.global.gentleOpeners,1);
+      const validation = pick(topic.validations,2);
+      const perspective = pick(topic.perspectives,3);
+      const action = pick(topic.actions,4);
+      const followup = pick(topic.followups,5);
+      return opener + " " + validation + "\n\n" + perspective + "\n\nPour maintenant : " + action + "\n\n" + followup;
+    }
+
+    function composeFallback(){
+      const f = KB.fallback;
+      return pick(f.validations,1) + " " + pick(f.perspectives,2) + "\n\n" + pick(f.actions,3) + "\n\n" + pick(f.followups,4);
+    }
+
+    function replyTo(text){
+      const emergency = detectEmergency(text);
+      if(emergency) return {...crisisReply(emergency),crisis:true};
+
+      const intent = conversationalIntent(text);
+      if(intent) return {text:intent};
+
+      const topic = detectTopic(text);
+      if(topic){
+        state.lastTopic = topic.id;
+        saveState();
+        let textReply = composeTopicReply(topic);
+        if(topic.id === "violence"){
+          textReply += "\n\nSi tu es en danger immédiat en Belgique, appelle le 112. Si ton téléphone est surveillé, utilise si possible un appareil sûr.";
+        }
+        return {text:textReply};
+      }
+      return {text:composeFallback()};
+    }
+
+    async function sendMessage(){
+      const text = input.value.trim();
+      if(!text) return;
+      input.value = "";
+      autoResize();
+
+      addMessage("user",escapeText(text));
+      saveTurn("user",text);
+      state.turnCount = (state.turnCount || 0) + 1;
+      saveState();
+
+      typing.classList.add("show");
+      conversation.scrollTop = conversation.scrollHeight;
+      await new Promise(r => setTimeout(r, 380 + Math.min(text.length,220) * 1.2));
+      typing.classList.remove("show");
+
+      const response = replyTo(text);
+      addMessage("bot",response.text,{crisis:response.crisis,resources:response.resources});
+      saveTurn("bot",response.text);
+    }
+
+    function autoResize(){
+      input.style.height = "auto";
+      input.style.height = Math.min(input.scrollHeight,130) + "px";
+    }
+
+    function startVoice(){
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if(!SpeechRecognition){
+        addMessage("bot","La reconnaissance vocale n’est pas disponible dans ce navigateur. Tu peux m’écrire ici.");
+        return;
+      }
+      const recognition = new SpeechRecognition();
+      recognition.lang = "fr-FR";
       recognition.interimResults = false;
       recognition.maxAlternatives = 1;
-
+      voiceBtn.classList.add("listening");
+      voiceBtn.textContent = "●";
       recognition.start();
 
-      recognition.onresult = function(event) {
-        const transcript = event.results[0][0].transcript;
-        document.getElementById('userInput').value = transcript;
+      recognition.onresult = e => {
+        input.value = e.results[0][0].transcript;
+        autoResize();
         sendMessage();
       };
-
-      recognition.onerror = function(event) {
-        alert('Erreur de reconnaissance vocale : ' + event.error);
+      recognition.onerror = () => {
+        addMessage("bot","Je n’ai pas réussi à entendre correctement. Tu peux réessayer ou écrire ton message.");
+      };
+      recognition.onend = () => {
+        voiceBtn.classList.remove("listening");
+        voiceBtn.textContent = "🎤";
       };
     }
+
+    function clearConversation(){
+      if(!confirm("Effacer la conversation enregistrée sur cet appareil ?")) return;
+      try{
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(STATE_KEY);
+      }catch(e){}
+      turns = [];
+      state.turnCount = 0;
+      state.lastTopic = null;
+      conversation.querySelectorAll(".message").forEach(x=>x.remove());
+      addMessage("bot","Conversation effacée. 🌿\n\nOn repart de zéro. Qu’est-ce qui te pèse aujourd’hui ?");
+    }
+
+    input.addEventListener("input",autoResize);
+    input.addEventListener("keydown",e=>{
+      if(e.key === "Enter" && !e.shiftKey){
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+    sendBtn.addEventListener("click",sendMessage);
+    voiceBtn.addEventListener("click",startVoice);
+    clearBtn.addEventListener("click",clearConversation);
+
+    renderTopics();
+    restoreConversation();
+    input.focus();
+  })();
   </script>
 </body>
 </html>
