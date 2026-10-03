@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#8068d8">
-  <meta name="serenia-engine" content="500m-ready-multilingual-v3">
+  <meta name="serenia-engine" content="500m-ready-ui-fr-en-de-v4">
   <title>SERENIA — Ton havre de paix intérieur</title>
   <meta name="description" content="SERENIA est un espace d'écoute et de soutien émotionnel pour mettre des mots sur ce que tu traverses.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -80,6 +80,7 @@
       font-weight:600;
     }
     .brand small{display:block;color:var(--muted);font-size:12px;margin-top:2px;letter-spacing:.02em}
+    .header-controls{display:flex;align-items:center;gap:9px}
     .privacy-pill{
       border:1px solid var(--line);
       background:rgba(255,255,255,.56);
@@ -89,6 +90,34 @@
       font-size:12px;
       white-space:nowrap;
       backdrop-filter:blur(12px);
+    }
+    .language-switcher{
+      display:flex;
+      align-items:center;
+      gap:3px;
+      padding:4px;
+      border:1px solid var(--line);
+      border-radius:999px;
+      background:rgba(255,255,255,.64);
+      backdrop-filter:blur(12px);
+    }
+    .language-switcher button{
+      border:0;
+      background:transparent;
+      color:#777086;
+      border-radius:999px;
+      padding:6px 8px;
+      min-width:34px;
+      font:600 10px "DM Sans",sans-serif;
+      letter-spacing:.04em;
+      cursor:pointer;
+      transition:.18s ease;
+    }
+    .language-switcher button:hover{color:var(--purple-dark);background:rgba(255,255,255,.72)}
+    .language-switcher button.active{
+      color:white;
+      background:linear-gradient(145deg,#8068d8,#6952bc);
+      box-shadow:0 4px 11px rgba(95,72,164,.2);
     }
     .card{
       background:var(--panel);
@@ -262,6 +291,9 @@
       .shell{width:100%;padding:0}
       header{padding:17px 17px 13px;margin:0}
       .privacy-pill{display:none}
+      .header-controls{gap:5px}
+      .language-switcher{padding:3px}
+      .language-switcher button{min-width:30px;padding:5px 6px;font-size:9px}
       .brand h1{font-size:25px}.logo{width:42px;height:42px}
       .card{border-radius:26px 26px 0 0;min-height:calc(100vh - 74px);box-shadow:none;border-left:0;border-right:0;border-bottom:0}
       .intro{padding:27px 20px 18px}.intro p{font-size:14px}
@@ -280,22 +312,29 @@
         <div class="logo" aria-hidden="true">✦</div>
         <div>
           <h1>SERENIA</h1>
-          <small>Ton havre de paix intérieur</small>
+          <small id="brandTagline">Ton havre de paix intérieur</small>
         </div>
       </div>
-      <div class="privacy-pill">🔒 Rien n’est envoyé à un serveur</div>
+      <div class="header-controls">
+        <div class="privacy-pill" id="privacyPill">🔒 Respect de ta vie privée</div>
+        <div class="language-switcher" id="languageSwitcher" aria-label="Langue / Language / Sprache">
+          <button type="button" data-lang="fr" aria-label="Français">FR</button>
+          <button type="button" data-lang="en" aria-label="English">EN</button>
+          <button type="button" data-lang="de" aria-label="Deutsch">DE</button>
+        </div>
+      </div>
     </header>
 
     <main class="card">
       <section class="intro">
-        <h2>Dépose ce qui <em>pèse.</em></h2>
-        <p>Rupture, solitude, peur, conflit, pensées en boucle… Écris comme ça vient. SERENIA t’aide à mettre des mots, prendre du recul et trouver une prochaine petite étape.</p>
+        <h2 id="introTitle">Dépose ce qui <em>pèse.</em></h2>
+        <p id="introText">Rupture, solitude, peur, conflit, pensées en boucle… Écris comme ça vient. SERENIA t’aide à mettre des mots, prendre du recul et trouver une prochaine petite étape.</p>
       </section>
 
       <div class="topics" id="topics" aria-label="Sujets fréquents"></div>
 
       <section class="conversation" id="conversation" aria-live="polite">
-        <div class="message bot">Salut. Moi c’est SERENIA. 🌿
+        <div class="message bot" id="initialGreeting">Salut. Moi c’est SERENIA. 🌿
 
 Tu peux me parler comme tu parlerais à quelqu’un de proche. Pas besoin de faire de belles phrases, ni de tout expliquer parfaitement. Tu peux juste me dire ce qui se passe.
 
@@ -310,15 +349,15 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
           <button class="send-btn" id="sendBtn" type="button" title="Envoyer" aria-label="Envoyer">➜</button>
         </div>
         <div class="composer-meta">
-          <span>Conversation conservée uniquement sur cet appareil.</span>
+          <span id="localNote">Conversation conservée uniquement sur cet appareil.</span>
           <button class="clear-btn" id="clearBtn" type="button">Effacer la conversation</button>
         </div>
       </div>
     </main>
 
-    <footer>
+    <footer id="siteFooter">
       <strong>SERENIA est un outil de soutien émotionnel, pas un professionnel de santé.</strong>
-      En cas de danger immédiat en Belgique, appelle le 112. Ligne de prévention du suicide Belgique francophone : 0800 32 123.
+      En cas de danger immédiat, appelle les services d’urgence de ton pays (112 dans l’Union européenne).
     </footer>
   </div>
 
@@ -339,11 +378,198 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
     const conversation = document.getElementById("conversation");
     const typing = document.getElementById("typing");
     const topicsEl = document.getElementById("topics");
+    const brandTagline = document.getElementById("brandTagline");
+    const privacyPill = document.getElementById("privacyPill");
+    const introTitle = document.getElementById("introTitle");
+    const introText = document.getElementById("introText");
+    const localNote = document.getElementById("localNote");
+    const siteFooter = document.getElementById("siteFooter");
+    const languageSwitcher = document.getElementById("languageSwitcher");
     const STORAGE_KEY = "serenia_conversation_v1";
     const STATE_KEY = "serenia_state_v1";
+    const UI_LANG_KEY = "serenia_ui_language_v1";
 
     const state = loadState();
     let turns = loadTurns();
+
+    const UI = {
+      fr:{
+        title:"SERENIA — Ton havre de paix intérieur",
+        description:"SERENIA est un espace d'écoute et de soutien émotionnel pour mettre des mots sur ce que tu traverses.",
+        tagline:"Ton havre de paix intérieur",
+        privacy:"🔒 Respect de ta vie privée",
+        introTitle:'Dépose ce qui <em>pèse.</em>',
+        introText:"Rupture, solitude, peur, conflit, pensées en boucle… Écris comme ça vient. SERENIA t’aide à mettre des mots, prendre du recul et trouver une prochaine petite étape.",
+        topicsLabel:"Sujets fréquents",
+        greeting:"Salut. Moi c’est SERENIA. 🌿\n\nTu peux me parler comme tu parlerais à quelqu’un de proche. Pas besoin de faire de belles phrases, ni de tout expliquer parfaitement. Tu peux juste me dire ce qui se passe.\n\nAllez… qu’est-ce qui te pèse vraiment aujourd’hui ?",
+        thinking:"SERENIA réfléchit…",
+        placeholder:"Exprime ce que tu ressens…",
+        messageLabel:"Ton message",
+        voiceTitle:"Parler",
+        sendTitle:"Envoyer",
+        localNote:"Conversation conservée uniquement sur cet appareil.",
+        clear:"Effacer la conversation",
+        confirmClear:"Effacer la conversation enregistrée sur cet appareil ?",
+        cleared:"Conversation effacée. 🌿\n\nOn repart de zéro. Qu’est-ce qui te pèse aujourd’hui ?",
+        voiceUnavailable:"La reconnaissance vocale n’est pas disponible dans ce navigateur. Tu peux m’écrire ici.",
+        voiceError:"Je n’ai pas réussi à entendre correctement. Tu peux réessayer ou écrire ton message.",
+        footer:"<strong>SERENIA est un outil de soutien émotionnel, pas un professionnel de santé.</strong> En cas de danger immédiat, appelle les services d’urgence de ton pays (112 dans l’Union européenne).",
+        chips:{
+          rupture:"💔 Rupture",ghosting:"🌫️ Silence / ghosting",solitude:"🌙 Solitude",anxiete:"🫧 Anxiété",
+          conflit:"⚡ Conflit",jalousie:"🪞 Jalousie",rumination:"🔁 Pensées en boucle",besoin_parler:"🌿 Besoin de parler"
+        },
+        prompts:{
+          rupture:"Je vis une rupture et j’ai du mal à gérer ce que je ressens.",
+          ghosting:"Cette personne ne me répond plus et ce silence me fait souffrir.",
+          solitude:"Je me sens vraiment seul·e en ce moment.",
+          anxiete:"Je suis très angoissé·e et mes pensées tournent en boucle.",
+          conflit:"Je viens d’avoir une grosse dispute avec quelqu’un que j’aime.",
+          jalousie:"Je ressens beaucoup de jalousie et ça me fait souffrir.",
+          rumination:"Je n’arrive pas à arrêter de penser à la même chose.",
+          besoin_parler:"J’ai besoin de parler. Ça ne va pas fort."
+        }
+      },
+      en:{
+        title:"SERENIA — Your inner haven",
+        description:"SERENIA is a space for emotional support, helping you put words to what you are going through.",
+        tagline:"Your inner haven",
+        privacy:"🔒 Your privacy matters",
+        introTitle:'Put down what <em>weighs on you.</em>',
+        introText:"Breakups, loneliness, fear, conflict, thoughts going in circles… Write it exactly as it comes. SERENIA helps you put things into words, step back and find one small next step.",
+        topicsLabel:"Common topics",
+        greeting:"Hey. I’m SERENIA. 🌿\n\nTalk to me the way you would talk to someone close. You don’t need perfect words or a polished story. Just tell me what’s going on.\n\nSo… what’s really weighing on you today?",
+        thinking:"SERENIA is thinking…",
+        placeholder:"Tell me what you’re feeling…",
+        messageLabel:"Your message",
+        voiceTitle:"Speak",
+        sendTitle:"Send",
+        localNote:"Conversation is stored only on this device.",
+        clear:"Clear conversation",
+        confirmClear:"Clear the conversation stored on this device?",
+        cleared:"Conversation cleared. 🌿\n\nFresh start. What’s weighing on you today?",
+        voiceUnavailable:"Voice recognition isn’t available in this browser. You can type to me here.",
+        voiceError:"I couldn’t hear you clearly. Try again or type your message.",
+        footer:"<strong>SERENIA is an emotional-support tool, not a healthcare professional.</strong> If you are in immediate danger, call your local emergency services (112 in the European Union).",
+        chips:{
+          rupture:"💔 Breakup",ghosting:"🌫️ Silence / ghosting",solitude:"🌙 Loneliness",anxiete:"🫧 Anxiety",
+          conflit:"⚡ Conflict",jalousie:"🪞 Jealousy",rumination:"🔁 Overthinking",besoin_parler:"🌿 Need to talk"
+        },
+        prompts:{
+          rupture:"I’m going through a breakup and I’m struggling with what I feel.",
+          ghosting:"This person stopped replying and the silence is hurting me.",
+          solitude:"I feel really lonely right now.",
+          anxiete:"I’m very anxious and my thoughts keep going in circles.",
+          conflit:"I just had a big argument with someone I love.",
+          jalousie:"I’m feeling a lot of jealousy and it’s hurting me.",
+          rumination:"I can’t stop thinking about the same thing.",
+          besoin_parler:"I need to talk. I’m not doing great."
+        }
+      },
+      de:{
+        title:"SERENIA — Dein innerer Zufluchtsort",
+        description:"SERENIA ist ein Ort für emotionale Unterstützung, an dem du Worte für das finden kannst, was du gerade durchmachst.",
+        tagline:"Dein innerer Zufluchtsort",
+        privacy:"🔒 Deine Privatsphäre zählt",
+        introTitle:'Leg ab, was dich <em>belastet.</em>',
+        introText:"Trennung, Einsamkeit, Angst, Konflikte, kreisende Gedanken… Schreib einfach, wie es kommt. SERENIA hilft dir, Worte zu finden, Abstand zu gewinnen und einen kleinen nächsten Schritt zu sehen.",
+        topicsLabel:"Häufige Themen",
+        greeting:"Hey. Ich bin SERENIA. 🌿\n\nRede mit mir so, wie du mit jemandem reden würdest, der dir nahesteht. Du brauchst keine perfekten Worte und musst nichts schön erklären. Sag mir einfach, was los ist.\n\nAlso… was belastet dich heute wirklich?",
+        thinking:"SERENIA denkt nach…",
+        placeholder:"Sag mir, was du fühlst…",
+        messageLabel:"Deine Nachricht",
+        voiceTitle:"Sprechen",
+        sendTitle:"Senden",
+        localNote:"Das Gespräch wird nur auf diesem Gerät gespeichert.",
+        clear:"Gespräch löschen",
+        confirmClear:"Das auf diesem Gerät gespeicherte Gespräch löschen?",
+        cleared:"Gespräch gelöscht. 🌿\n\nWir fangen neu an. Was belastet dich heute?",
+        voiceUnavailable:"Die Spracherkennung ist in diesem Browser nicht verfügbar. Du kannst mir hier schreiben.",
+        voiceError:"Ich konnte dich nicht richtig verstehen. Versuch es noch einmal oder schreib deine Nachricht.",
+        footer:"<strong>SERENIA ist ein Tool zur emotionalen Unterstützung und kein medizinisches Fachpersonal.</strong> Bei unmittelbarer Gefahr ruf den örtlichen Notruf an (112 in der Europäischen Union).",
+        chips:{
+          rupture:"💔 Trennung",ghosting:"🌫️ Schweigen / Ghosting",solitude:"🌙 Einsamkeit",anxiete:"🫧 Angst",
+          conflit:"⚡ Streit",jalousie:"🪞 Eifersucht",rumination:"🔁 Grübeln",besoin_parler:"🌿 Redebedarf"
+        },
+        prompts:{
+          rupture:"Ich mache gerade eine Trennung durch und komme mit meinen Gefühlen nur schwer klar.",
+          ghosting:"Diese Person antwortet mir nicht mehr und dieses Schweigen tut mir weh.",
+          solitude:"Ich fühle mich im Moment wirklich einsam.",
+          anxiete:"Ich bin sehr angespannt und meine Gedanken drehen sich ständig im Kreis.",
+          conflit:"Ich hatte gerade einen heftigen Streit mit einem Menschen, den ich liebe.",
+          jalousie:"Ich bin sehr eifersüchtig und das tut mir weh.",
+          rumination:"Ich kann nicht aufhören, über dieselbe Sache nachzudenken.",
+          besoin_parler:"Ich muss reden. Mir geht es gerade nicht gut."
+        }
+      }
+    };
+
+    function browserUiLanguage(){
+      const langs=[...(navigator.languages||[]),navigator.language||""].filter(Boolean);
+      for(const raw of langs){
+        const l=raw.toLowerCase();
+        if(l.startsWith("fr")) return "fr";
+        if(l.startsWith("de")) return "de";
+        if(l.startsWith("en")) return "en";
+      }
+      return "en";
+    }
+
+    function storedUiLanguage(){
+      try{
+        const saved=localStorage.getItem(UI_LANG_KEY);
+        return ["fr","en","de"].includes(saved) ? saved : null;
+      }catch(e){ return null; }
+    }
+
+    let uiLang = storedUiLanguage() || browserUiLanguage();
+
+    function speechLocale(){
+      const browser=(navigator.language||"").toLowerCase();
+      if(browser.startsWith(uiLang)) return navigator.language;
+      return uiLang==="de" ? "de-DE" : uiLang==="en" ? "en-US" : "fr-FR";
+    }
+
+    function applyUiLanguage(lang,{save=true}={}){
+      if(!UI[lang]) lang="en";
+      uiLang=lang;
+      const t=UI[lang];
+      document.documentElement.lang=lang;
+      document.title=t.title;
+      const desc=document.querySelector('meta[name="description"]');
+      if(desc) desc.setAttribute("content",t.description);
+      brandTagline.textContent=t.tagline;
+      privacyPill.textContent=t.privacy;
+      introTitle.innerHTML=t.introTitle;
+      introText.textContent=t.introText;
+      topicsEl.setAttribute("aria-label",t.topicsLabel);
+      typing.textContent=t.thinking;
+      input.placeholder=t.placeholder;
+      input.setAttribute("aria-label",t.messageLabel);
+      voiceBtn.title=t.voiceTitle;
+      voiceBtn.setAttribute("aria-label",t.voiceTitle);
+      sendBtn.title=t.sendTitle;
+      sendBtn.setAttribute("aria-label",t.sendTitle);
+      localNote.textContent=t.localNote;
+      clearBtn.textContent=t.clear;
+      siteFooter.innerHTML=t.footer;
+
+      languageSwitcher.querySelectorAll("[data-lang]").forEach(btn=>{
+        const active=btn.dataset.lang===lang;
+        btn.classList.toggle("active",active);
+        btn.setAttribute("aria-pressed",active ? "true" : "false");
+      });
+
+      if(!turns.length){
+        const initial=conversation.querySelector(".message.bot");
+        if(initial) initial.textContent=t.greeting;
+      }
+
+      renderTopics();
+
+      if(save){
+        try{localStorage.setItem(UI_LANG_KEY,lang);}catch(e){}
+      }
+    }
 
     function normalize(text){
       return text.toLowerCase()
@@ -364,10 +590,7 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
       if(ds > es && ds > fs) return "de";
       if(es > ds && es > fs) return "en";
       if(fs > 0) return "fr";
-      const browser=(navigator.language||"fr").toLowerCase();
-      if(browser.startsWith("de")) return "de";
-      if(browser.startsWith("en")) return "en";
-      return "fr";
+      return uiLang || browserUiLanguage();
     }
 
     function personaPack(lang){
@@ -393,15 +616,17 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
 
     function renderTopics(){
       const preferred = ["rupture","ghosting","solitude","anxiete","conflit","jalousie","rumination","besoin_parler"];
+      topicsEl.innerHTML="";
+      const copy=UI[uiLang] || UI.en;
       preferred.forEach(id => {
         const t = KB.topics.find(x => x.id === id);
         if(!t) return;
         const b = document.createElement("button");
         b.className = "chip";
         b.type = "button";
-        b.textContent = t.icon + " " + t.label;
+        b.textContent = copy.chips[id] || (t.icon + " " + t.label);
         b.addEventListener("click", () => {
-          input.value = topicPrompt(t.id);
+          input.value = topicPrompt(id);
           autoResize();
           input.focus();
         });
@@ -410,17 +635,8 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
     }
 
     function topicPrompt(id){
-      const prompts = {
-        rupture:"Je vis une rupture et j’ai du mal à gérer ce que je ressens.",
-        ghosting:"Cette personne ne me répond plus et ce silence me fait souffrir.",
-        solitude:"Je me sens vraiment seul·e en ce moment.",
-        anxiete:"Je suis très angoissé·e et mes pensées tournent en boucle.",
-        conflit:"Je viens d’avoir une grosse dispute avec quelqu’un que j’aime.",
-        jalousie:"Je ressens beaucoup de jalousie et ça me fait souffrir.",
-        rumination:"Je n’arrive pas à arrêter de penser à la même chose.",
-        besoin_parler:"J’ai besoin de parler. Ça ne va pas fort."
-      };
-      return prompts[id] || "J’ai besoin de parler de " + id + ".";
+      const copy=UI[uiLang] || UI.en;
+      return copy.prompts[id] || (uiLang==="de" ? "Ich möchte darüber reden." : uiLang==="en" ? "I need to talk about this." : "J’ai besoin d’en parler.");
     }
 
     function addMessage(role, text, opts={}){
@@ -829,11 +1045,11 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
     function startVoice(){
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if(!SpeechRecognition){
-        addMessage("bot","La reconnaissance vocale n’est pas disponible dans ce navigateur. Tu peux m’écrire ici.");
+        addMessage("bot",(UI[uiLang]||UI.en).voiceUnavailable);
         return;
       }
       const recognition = new SpeechRecognition();
-      recognition.lang = "fr-FR";
+      recognition.lang = speechLocale();
       recognition.interimResults = false;
       recognition.maxAlternatives = 1;
       voiceBtn.classList.add("listening");
@@ -846,7 +1062,7 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
         sendMessage();
       };
       recognition.onerror = () => {
-        addMessage("bot","Je n’ai pas réussi à entendre correctement. Tu peux réessayer ou écrire ton message.");
+        addMessage("bot",(UI[uiLang]||UI.en).voiceError);
       };
       recognition.onend = () => {
         voiceBtn.classList.remove("listening");
@@ -855,7 +1071,8 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
     }
 
     function clearConversation(){
-      if(!confirm("Effacer la conversation enregistrée sur cet appareil ?")) return;
+      const copy=UI[uiLang] || UI.en;
+      if(!confirm(copy.confirmClear)) return;
       try{
         localStorage.removeItem(STORAGE_KEY);
         localStorage.removeItem(STATE_KEY);
@@ -864,7 +1081,7 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
       state.turnCount = 0;
       state.lastTopic = null;
       conversation.querySelectorAll(".message").forEach(x=>x.remove());
-      addMessage("bot","Conversation effacée. 🌿\n\nOn repart de zéro. Qu’est-ce qui te pèse aujourd’hui ?");
+      addMessage("bot",copy.cleared);
     }
 
     input.addEventListener("input",autoResize);
@@ -877,8 +1094,13 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
     sendBtn.addEventListener("click",sendMessage);
     voiceBtn.addEventListener("click",startVoice);
     clearBtn.addEventListener("click",clearConversation);
+    languageSwitcher.addEventListener("click",e=>{
+      const btn=e.target.closest("[data-lang]");
+      if(!btn) return;
+      applyUiLanguage(btn.dataset.lang);
+    });
 
-    renderTopics();
+    applyUiLanguage(uiLang,{save:false});
     restoreConversation();
     input.focus();
   })();
