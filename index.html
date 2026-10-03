@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#8068d8">
-  <meta name="serenia-engine" content="multilingual-brotherly-v2">
+  <meta name="serenia-engine" content="500m-ready-multilingual-v3">
   <title>SERENIA — Ton havre de paix intérieur</title>
   <meta name="description" content="SERENIA est un espace d'écoute et de soutien émotionnel pour mettre des mots sur ce que tu traverses.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -327,6 +327,7 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
   <script src="knowledge-base.js"></script>
   <script src="serenia-persona.js"></script>
   <script src="serenia-i18n.js"></script>
+  <script src="serenia-remote.js"></script>
   <script>
   (() => {
     "use strict";
@@ -733,8 +734,34 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
       const topic = rankedTopics.length ? rankedTopics[0].topic : null;
       const domainIds = rankedTopics.map(x => x.topic.id);
 
-      // The large 10M domain library is currently French.
-      // English/German use their native language core until their large domain packs are connected.
+      // 500M backend path: when configured, FR/EN/DE all use the same
+      // remote knowledge search contract, with language-native records.
+      if(window.SERENIA_REMOTE && window.SERENIA_REMOTE.enabled()){
+        try{
+          const remote = await window.SERENIA_REMOTE.search({
+            text,
+            lang,
+            topics:domainIds,
+            limit:8
+          });
+          if(remote && remote.length){
+            const best=remote[0];
+            state.lastTopic=best.topic || (topic && topic.id) || state.lastTopic;
+            saveState();
+
+            let reply=(best.response || "").trim();
+            if(best.followup) reply += "\n\n" + best.followup;
+
+            // Keep the personality close without altering emergency handling.
+            if(lang==="fr") reply=makeWarmer(reply);
+            return {text:reply};
+          }
+        }catch(err){
+          console.warn("SERENIA remote fallback:",err);
+        }
+      }
+
+      // Local multilingual core remains available even if the backend is offline.
       if(lang !== "fr"){
         if(topic){
           state.lastTopic=topic.id;
@@ -745,6 +772,7 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
         return {text:p ? p.fallback : "Tell me a little more."};
       }
 
+      // Existing ~10M French local library stays as offline fallback.
       if(domainIds.length){
         await Promise.all(domainIds.map(loadDomain));
       }
