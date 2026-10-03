@@ -295,11 +295,11 @@
       <div class="topics" id="topics" aria-label="Sujets fréquents"></div>
 
       <section class="conversation" id="conversation" aria-live="polite">
-        <div class="message bot">Bonjour. Je suis SERENIA. 🌿
+        <div class="message bot">Salut. Moi c’est SERENIA. 🌿
 
-Tu peux me parler librement de ce que tu traverses. Je ne vais pas te juger, et tu n’as pas besoin de trouver les bons mots.
+Tu peux me parler comme tu parlerais à quelqu’un de proche. Pas besoin de faire de belles phrases, ni de tout expliquer parfaitement. Tu peux juste me dire ce qui se passe.
 
-Qu’est-ce qui te pèse le plus aujourd’hui ?</div>
+Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
         <div class="typing" id="typing">SERENIA réfléchit…</div>
       </section>
 
@@ -579,6 +579,38 @@ Qu’est-ce qui te pèse le plus aujourd’hui ?</div>
       return {entry:chosen,score:bestScore};
     }
 
+    function makeWarmer(text){
+      if(!text) return text;
+      let out = text
+        .replace(/Tu sembles vivre cela/g, "Là, ce que je comprends, c’est que tu vis ça")
+        .replace(/Dans ce contexte, le besoin qui ressort est probablement de/g, "Et derrière tout ça, j’ai l’impression que tu as surtout besoin de")
+        .replace(/Séparer la situation, l'émotion et le besoin peut réduire une partie de la confusion\./g, "On va essayer de démêler tout ça tranquillement, sans te demander de tout résoudre d’un coup.")
+        .replace(/Commence par ce qui est observable/g, "On peut déjà revenir à quelque chose de simple : ce qui est vraiment observable")
+        .replace(/Pour maintenant, tu peux/g, "Là, tout de suite, tu peux")
+        .replace(/Une autre piste utile :/g, "Et tu peux aussi essayer ça :")
+        .replace(/Le but n'est pas d'effacer ce que tu ressens/g, "Le but, ce n’est surtout pas de faire comme si tu ne ressentais rien")
+        .replace(/Si la situation devient durablement envahissante/g, "Et si tu sens que ça prend vraiment toute la place")
+        .replace(/Essaie donc de ne pas chercher une conclusion totale tout de suite\./g, "Ne te force pas à trouver toute la réponse maintenant.")
+        .replace(/L'objectif n'est pas/g, "L’idée, ce n’est pas")
+        .replace(/Pour les prochaines heures, tu peux faire deux choses très simples :/g, "Pour les prochaines heures, fais simple :")
+        .replace(/Une petite action claire vaut souvent mieux/g, "Franchement, une petite action claire vaut souvent mieux")
+        .replace(/Tu peux revenir dessus ensuite/g, "Tu pourras y revenir ensuite")
+        .replace(/Qu'est-ce qui/g, "Dis-moi : qu’est-ce qui");
+
+      const starters = [
+        "Ok… je vois mieux ce que tu veux dire.",
+        "Oui… je comprends pourquoi ça te remue autant.",
+        "D’accord. Là, je vois bien ce qui te fait mal.",
+        "Je te suis. Et oui, ça peut vraiment faire mal.",
+        "Ok. On va regarder ça ensemble, sans tourner autour du pot."
+      ];
+      const alreadyWarm = /^(Ok|Oui|D’accord|Je te suis|Je comprends|Salut)/.test(out);
+      if(!alreadyWarm){
+        out = starters[(state.turnCount || 0) % starters.length] + "\n\n" + out;
+      }
+      return out;
+    }
+
     function composeTopicReply(topic){
       const opener = pick(KB.global.gentleOpeners,1);
       const validation = pick(topic.validations,2);
@@ -598,7 +630,7 @@ Qu’est-ce qui te pèse le plus aujourd’hui ?</div>
       if(emergency) return {...crisisReply(emergency),crisis:true};
 
       const intent = conversationalIntent(text);
-      if(intent) return {text:intent};
+      if(intent) return {text:makeWarmer(intent)};
 
       const rankedTopics = detectTopics(text,2);
       const topic = rankedTopics.length ? rankedTopics[0].topic : null;
@@ -613,7 +645,7 @@ Qu’est-ce qui te pèse le plus aujourd’hui ?</div>
       if(matched && (!topic || matched.entry.domain === topic.id || matched.score >= 10)){
         state.lastTopic = matched.entry.domain;
         saveState();
-        let textReply = matched.entry.response;
+        let textReply = makeWarmer(matched.entry.response);
         if(matched.entry.domain === "violence"){
           textReply += "\n\nSi tu es en danger immédiat en Belgique, appelle le 112. Si ton téléphone est surveillé, utilise si possible un appareil sûr.";
         }
@@ -623,13 +655,13 @@ Qu’est-ce qui te pèse le plus aujourd’hui ?</div>
       if(topic){
         state.lastTopic = topic.id;
         saveState();
-        let textReply = composeTopicReply(topic);
+        let textReply = makeWarmer(composeTopicReply(topic));
         if(topic.id === "violence"){
           textReply += "\n\nSi tu es en danger immédiat en Belgique, appelle le 112. Si ton téléphone est surveillé, utilise si possible un appareil sûr.";
         }
         return {text:textReply};
       }
-      return {text:composeFallback()};
+      return {text:makeWarmer(composeFallback())};
     }
 
     async function sendMessage(){
