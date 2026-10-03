@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#8068d8">
+  <meta name="serenia-engine" content="10m-lazy-domains-v1">
   <title>SERENIA — Ton havre de paix intérieur</title>
   <meta name="description" content="SERENIA est un espace d'écoute et de soutien émotionnel pour mettre des mots sur ce que tu traverses.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -324,16 +325,6 @@ Qu’est-ce qui te pèse le plus aujourd’hui ?</div>
   <noscript><div class="noscript">SERENIA a besoin de JavaScript pour fonctionner.</div></noscript>
 
   <script src="knowledge-base.js"></script>
-  <script src="knowledge/library-01.js"></script>
-  <script src="knowledge/library-02.js"></script>
-  <script src="knowledge/library-03.js"></script>
-  <script src="knowledge/library-04.js"></script>
-  <script src="knowledge/library-05.js"></script>
-  <script src="knowledge/library-06.js"></script>
-  <script src="knowledge/library-07.js"></script>
-  <script src="knowledge/library-08.js"></script>
-  <script src="knowledge/library-09.js"></script>
-  <script src="knowledge/library-10.js"></script>
   <script>
   (() => {
     "use strict";
@@ -519,13 +510,47 @@ Qu’est-ce qui te pèse le plus aujourd’hui ?</div>
       };
     }
 
-    function libraryMatch(text){
-      const lib = window.SERENIA_LIBRARY || [];
+    const domainLoads = {};
+
+    function loadDomain(id){
+      window.SERENIA_DOMAINS = window.SERENIA_DOMAINS || {};
+      if(window.SERENIA_DOMAINS[id]) return Promise.resolve(window.SERENIA_DOMAINS[id]);
+      if(domainLoads[id]) return domainLoads[id];
+
+      domainLoads[id] = new Promise((resolve,reject) => {
+        const script = document.createElement("script");
+        script.src = "knowledge/domains/" + encodeURIComponent(id) + ".js?v=10m";
+        script.async = true;
+        script.onload = () => resolve(window.SERENIA_DOMAINS[id] || []);
+        script.onerror = () => reject(new Error("Impossible de charger le module " + id));
+        document.head.appendChild(script);
+      }).catch(err => {
+        console.warn(err);
+        delete domainLoads[id];
+        return [];
+      });
+
+      return domainLoads[id];
+    }
+
+    function detectTopics(text, max=2){
+      const n = normalize(text);
+      return KB.topics
+        .map(t => ({topic:t,score:scoreTopic(n,t)}))
+        .filter(x => x.score > 0)
+        .sort((a,b)=>b.score-a.score)
+        .slice(0,max);
+    }
+
+    function libraryMatch(text, domainIds=[]){
+      const pools = domainIds.map(id => (window.SERENIA_DOMAINS && window.SERENIA_DOMAINS[id]) || []);
+      const lib = pools.flat();
       if(!lib.length) return null;
+
       const n = normalize(text);
       const words = new Set(n.split(" ").filter(Boolean));
-      let best = null;
       let bestScore = 0;
+      let candidates = [];
 
       for(const entry of lib){
         let score = 0;
@@ -533,18 +558,25 @@ Qu’est-ce qui te pèse le plus aujourd’hui ?</div>
           const t = normalize(raw);
           if(!t) continue;
           if(t.includes(" ")){
-            if(n.includes(t)) score += 8 + Math.min(4, Math.floor(t.length / 12));
+            if(n.includes(t)) score += 8 + Math.min(5, Math.floor(t.length / 12));
           }else if(words.has(t)){
             score += t.length >= 7 ? 4 : 2;
           }
         }
         if(state.lastTopic && entry.domain === state.lastTopic) score += 1.5;
+
         if(score > bestScore){
           bestScore = score;
-          best = entry;
+          candidates = [entry];
+        }else if(score === bestScore && score > 0){
+          candidates.push(entry);
         }
       }
-      return bestScore >= 4 ? {entry:best,score:bestScore} : null;
+
+      if(bestScore < 4 || !candidates.length) return null;
+      const seed = (state.turnCount || 0) + n.length;
+      const chosen = candidates[Math.abs(seed) % candidates.length];
+      return {entry:chosen,score:bestScore};
     }
 
     function composeTopicReply(topic){
@@ -561,15 +593,22 @@ Qu’est-ce qui te pèse le plus aujourd’hui ?</div>
       return pick(f.validations,1) + " " + pick(f.perspectives,2) + "\n\n" + pick(f.actions,3) + "\n\n" + pick(f.followups,4);
     }
 
-    function replyTo(text){
+    async function replyTo(text){
       const emergency = detectEmergency(text);
       if(emergency) return {...crisisReply(emergency),crisis:true};
 
       const intent = conversationalIntent(text);
       if(intent) return {text:intent};
 
-      const topic = detectTopic(text);
-      const matched = libraryMatch(text);
+      const rankedTopics = detectTopics(text,2);
+      const topic = rankedTopics.length ? rankedTopics[0].topic : null;
+      const domainIds = rankedTopics.map(x => x.topic.id);
+
+      if(domainIds.length){
+        await Promise.all(domainIds.map(loadDomain));
+      }
+
+      const matched = libraryMatch(text,domainIds);
 
       if(matched && (!topic || matched.entry.domain === topic.id || matched.score >= 10)){
         state.lastTopic = matched.entry.domain;
@@ -609,7 +648,7 @@ Qu’est-ce qui te pèse le plus aujourd’hui ?</div>
       await new Promise(r => setTimeout(r, 380 + Math.min(text.length,220) * 1.2));
       typing.classList.remove("show");
 
-      const response = replyTo(text);
+      const response = await replyTo(text);
       addMessage("bot",response.text,{crisis:response.crisis,resources:response.resources});
       saveTurn("bot",response.text);
     }
