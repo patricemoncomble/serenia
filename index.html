@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#8068d8">
-  <meta name="serenia-engine" content="10m-lazy-domains-v1">
+  <meta name="serenia-engine" content="multilingual-brotherly-v2">
   <title>SERENIA — Ton havre de paix intérieur</title>
   <meta name="description" content="SERENIA est un espace d'écoute et de soutien émotionnel pour mettre des mots sur ce que tu traverses.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -325,6 +325,8 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
   <noscript><div class="noscript">SERENIA a besoin de JavaScript pour fonctionner.</div></noscript>
 
   <script src="knowledge-base.js"></script>
+  <script src="serenia-persona.js"></script>
+  <script src="serenia-i18n.js"></script>
   <script>
   (() => {
     "use strict";
@@ -348,6 +350,28 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
         .replace(/[’']/g," ")
         .replace(/[^a-z0-9àâçéèêëîïôûùüÿñæœ\s-]/gi," ")
         .replace(/\s+/g," ").trim();
+    }
+
+    function detectLanguage(text){
+      const n = normalize(text || "");
+      const tokens = new Set(n.split(" ").filter(Boolean));
+      const deSignals = ["ich","du","dich","mir","nicht","mein","meine","warum","aber","weil","bin","ist","habe","hat","liebe","angst","allein","trennung","freund","freundin"];
+      const enSignals = ["i","you","me","my","why","but","because","am","is","are","have","has","love","afraid","alone","breakup","friend","feel","feeling"];
+      const frSignals = ["je","tu","moi","mon","ma","mes","pourquoi","mais","parce","suis","est","ai","amour","peur","seul","seule","rupture","ami","amie"];
+      const score = arr => arr.reduce((s,w)=>s+(tokens.has(w)?1:0),0);
+      const ds=score(deSignals), es=score(enSignals), fs=score(frSignals);
+      if(ds > es && ds > fs) return "de";
+      if(es > ds && es > fs) return "en";
+      if(fs > 0) return "fr";
+      const browser=(navigator.language||"fr").toLowerCase();
+      if(browser.startsWith("de")) return "de";
+      if(browser.startsWith("en")) return "en";
+      return "fr";
+    }
+
+    function personaPack(lang){
+      const P = window.SERENIA_PERSONA;
+      return (P && P.languages && P.languages[lang]) || (P && P.languages && P.languages.fr) || null;
     }
 
     function escapeText(text){
@@ -468,46 +492,86 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
       return ranked[0].score > 0 ? ranked[0].topic : null;
     }
 
-    function detectEmergency(text){
+    function detectEmergency(text, lang="fr"){
       const n = normalize(text);
-      if(hasAny(n, KB.emergency.highRiskPatterns)) return "high";
-      if(hasAny(n, KB.emergency.selfHarmPatterns)) return "selfharm";
-      if(hasAny(n, KB.emergency.concernPatterns)) return "concern";
+      if(lang === "fr"){
+        if(hasAny(n, KB.emergency.highRiskPatterns)) return "high";
+        if(hasAny(n, KB.emergency.selfHarmPatterns)) return "selfharm";
+        if(hasAny(n, KB.emergency.concernPatterns)) return "concern";
+        return null;
+      }
+      const patterns = {
+        en: {
+          high:["i am going to kill myself","i'm going to kill myself","i will kill myself","i have a suicide plan","i am going to end my life","i am going to do it tonight"],
+          selfharm:["hurt myself","cut myself","self harm","self-harm","injure myself"],
+          concern:["want to die","don't want to live","do not want to live","wish i was dead","life is not worth living","want to disappear"]
+        },
+        de: {
+          high:["ich werde mich umbringen","ich bringe mich um","ich will mich jetzt töten","ich habe einen suizidplan","ich werde meinem leben ein ende setzen"],
+          selfharm:["mir weh tun","mich verletzen","mich schneiden","selbstverletzung"],
+          concern:["ich will sterben","ich will nicht mehr leben","möchte nicht mehr leben","wäre lieber tot","mein leben hat keinen sinn","ich will verschwinden"]
+        }
+      };
+      const p=patterns[lang]||patterns.en;
+      if(hasAny(n,p.high)) return "high";
+      if(hasAny(n,p.selfharm)) return "selfharm";
+      if(hasAny(n,p.concern)) return "concern";
       return null;
     }
 
-    function conversationalIntent(text){
+    function conversationalIntent(text, lang="fr"){
       const n = normalize(text);
-      if(/^(bonjour|salut|hello|coucou|bonsoir|hey)\b/.test(n) && n.split(" ").length < 6){
-        return "Bonjour. 🌿 Je suis là. Tu peux commencer simplement : qu’est-ce qui est le plus lourd pour toi aujourd’hui ?";
+      if(lang==="en"){
+        if(/^(hello|hi|hey|good morning|good evening)\b/.test(n) && n.split(" ").length < 7)
+          return "Hey. I’m here. Give me the real version — what’s weighing on you today?";
+        if(/^(thanks|thank you|thank you so much)$/.test(n))
+          return "Anytime. We’ll take it one piece at a time. What still feels heaviest right now?";
       }
-      if(/^(merci|merci beaucoup|thanks|c est gentil)$/.test(n)){
-        return "Avec plaisir. Prends les choses une étape à la fois. Si tu veux continuer, dis-moi simplement ce qui reste le plus difficile maintenant.";
+      if(lang==="de"){
+        if(/^(hallo|hi|hey|guten morgen|guten abend)\b/.test(n) && n.split(" ").length < 7)
+          return "Hey. Ich bin da. Erzähl mir die echte Version — was liegt dir heute am schwersten auf dem Herzen?";
+        if(/^(danke|vielen dank|danke dir)$/.test(n))
+          return "Immer. Wir gehen das Stück für Stück an. Was ist gerade noch am schwersten?";
       }
-      if(/^(oui|ouais|ok|d accord|non|pas vraiment)$/.test(n) && state.lastTopic){
-        const t = KB.topics.find(x => x.id === state.lastTopic);
-        if(t) return pick(t.followups,2);
+      if(lang==="fr"){
+        if(/^(bonjour|salut|coucou|bonsoir|hey)\b/.test(n) && n.split(" ").length < 6)
+          return "Salut. 🌿 Je suis là. Balance-moi la vraie version : qu’est-ce qui te pèse le plus aujourd’hui ?";
+        if(/^(merci|merci beaucoup|c est gentil)$/.test(n))
+          return "Avec plaisir. On prend ça morceau par morceau. Qu’est-ce qui reste le plus lourd maintenant ?";
+      }
+      if(/^(oui|ouais|ok|d accord|non|pas vraiment|yes|no|yeah|okay|ja|nein|nicht wirklich)$/.test(n) && state.lastTopic){
+        const p=personaPack(lang);
+        return p ? pick(p.ask,2) : null;
       }
       return null;
     }
 
-    function crisisReply(level){
-      if(level === "high"){
+    function crisisReply(level, lang="fr"){
+      if(lang==="en"){
+        const urgent = level==="high" || level==="selfharm";
         return {
-          text:"Ce que tu viens d’écrire me fait penser que tu pourrais être en danger maintenant. Ne reste pas seul·e avec ça. Éloigne-toi de tout ce que tu pourrais utiliser pour te faire du mal et va vers une personne réelle, tout de suite si tu peux.\n\nSi tu es en Belgique et qu’un passage à l’acte est possible ou imminent, appelle le 112. Tu peux aussi appeler le 0800 32 123, ligne gratuite et anonyme de prévention du suicide en Belgique francophone, 24h/24 et 7j/7.\n\nSi tu es ailleurs, contacte les services d’urgence de ton pays ou une ligne de crise locale. L’objectif maintenant n’est pas de tout résoudre : c’est de te garder en sécurité pendant les prochaines minutes.",
-          resources:true
+          text: urgent
+            ? "I’m taking this seriously. If you might hurt yourself now, don’t stay alone with it. Put distance between you and anything you could use to hurt yourself, and get near a real person if you can.\n\nIf you are in Belgium, Germany or elsewhere in the EU and the danger is immediate, call 112. If you are elsewhere, call your local emergency number or crisis service.\n\nRight now, you do not need to solve your whole life. The job is to stay safe through the next minutes."
+            : "This sounds like a level of pain you shouldn’t carry alone. I can stay with you here, but please bring a real person into this too — someone you trust, a doctor, therapist or crisis service.\n\nIf you may act on thoughts of dying or hurting yourself, call emergency services now (112 in Belgium/Germany/EU, or your local emergency number).",
+          resources:false
         };
+      }
+      if(lang==="de"){
+        const urgent = level==="high" || level==="selfharm";
+        return {
+          text: urgent
+            ? "Ich nehme das sehr ernst. Wenn du dir jetzt etwas antun könntest, bleib damit nicht allein. Schaffe Abstand zu allem, womit du dich verletzen könntest, und geh wenn möglich zu einem echten Menschen.\n\nWenn du in Belgien, Deutschland oder anderswo in der EU bist und unmittelbare Gefahr besteht, ruf 112 an. Anderswo wähle die örtliche Notrufnummer oder einen Krisendienst.\n\nDu musst jetzt nicht dein ganzes Leben lösen. Die Aufgabe ist nur, die nächsten Minuten sicher zu überstehen."
+            : "Das klingt nach einem Schmerz, den du nicht allein tragen solltest. Ich bleibe hier bei dir, aber hol bitte auch einen echten Menschen dazu — jemanden, dem du vertraust, einen Arzt, Therapeuten oder Krisendienst.\n\nWenn du glaubst, dass du dir etwas antun könntest, ruf jetzt den Notruf an (112 in Belgien/Deutschland/EU oder deine örtliche Notrufnummer).",
+          resources:false
+        };
+      }
+      if(level === "high"){
+        return {text:"Ce que tu viens d’écrire me fait penser que tu pourrais être en danger maintenant. Ne reste pas seul·e avec ça. Éloigne-toi de tout ce que tu pourrais utiliser pour te faire du mal et va vers une personne réelle, tout de suite si tu peux.\n\nSi tu es en Belgique et qu’un passage à l’acte est possible ou imminent, appelle le 112. Tu peux aussi appeler le 0800 32 123, ligne gratuite et anonyme de prévention du suicide en Belgique francophone, 24h/24 et 7j/7.\n\nL’objectif maintenant n’est pas de tout résoudre : c’est de te garder en sécurité pendant les prochaines minutes.",resources:true};
       }
       if(level === "selfharm"){
-        return {
-          text:"Je prends ce que tu dis au sérieux. Si tu risques de te faire du mal maintenant, mets de la distance entre toi et ce que tu pourrais utiliser, et rapproche-toi d’une personne de confiance ou d’un lieu où tu n’es pas seul·e.\n\nEn Belgique, si le danger est immédiat : 112. Pour parler anonymement avec une personne formée à la crise suicidaire : 0800 32 123, 24h/24 et 7j/7.\n\nPour l’instant, concentre-toi uniquement sur la sécurité et les prochaines minutes.",
-          resources:true
-        };
+        return {text:"Je prends ce que tu dis au sérieux. Si tu risques de te faire du mal maintenant, mets de la distance entre toi et ce que tu pourrais utiliser, et rapproche-toi d’une personne de confiance ou d’un lieu où tu n’es pas seul·e.\n\nEn Belgique, si le danger est immédiat : 112. Tu peux aussi appeler le 0800 32 123, 24h/24 et 7j/7.\n\nPour l’instant, concentre-toi uniquement sur ta sécurité et les prochaines minutes.",resources:true};
       }
-      return {
-        text:"Tu sembles arriver à un niveau de souffrance où il est important de ne pas rester seul·e. Je peux continuer à t’écouter ici, mais une présence humaine compte vraiment maintenant.\n\nEn Belgique francophone, tu peux appeler gratuitement et anonymement le 0800 32 123, 24h/24 et 7j/7. Si tu penses que tu pourrais te faire du mal ou que ta vie est en danger, appelle le 112.\n\nDans l’immédiat, rapproche-toi si possible d’une personne sûre et reste dans un endroit où tu n’es pas isolé·e.",
-        resources:true
-      };
+      return {text:"Là, la souffrance a l’air vraiment lourde. Je peux rester avec toi ici, mais ne porte pas ça seul·e. Fais entrer une personne réelle dans la situation : un proche fiable, un médecin, un psychologue ou un service d’écoute.\n\nEn Belgique francophone, tu peux appeler gratuitement et anonymement le 0800 32 123, 24h/24 et 7j/7. Si tu penses pouvoir te faire du mal ou si ta vie est en danger, appelle le 112.",resources:true};
     }
 
     const domainLoads = {};
@@ -533,10 +597,20 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
       return domainLoads[id];
     }
 
-    function detectTopics(text, max=2){
+    function detectTopics(text, max=2, lang="fr"){
       const n = normalize(text);
+      const aliases = window.SERENIA_I18N && window.SERENIA_I18N.aliases && window.SERENIA_I18N.aliases[lang];
       return KB.topics
-        .map(t => ({topic:t,score:scoreTopic(n,t)}))
+        .map(t => {
+          let score = lang==="fr" ? scoreTopic(n,t) : 0;
+          const extra = aliases && aliases[t.id] ? aliases[t.id] : [];
+          extra.forEach(k => {
+            const key=normalize(k);
+            if(key && n.includes(key)) score += key.includes(" ") ? 7 : 3;
+          });
+          if(state.lastTopic===t.id) score += .75;
+          return {topic:t,score};
+        })
         .filter(x => x.score > 0)
         .sort((a,b)=>b.score-a.score)
         .slice(0,max);
@@ -577,6 +651,24 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
       const seed = (state.turnCount || 0) + n.length;
       const chosen = candidates[Math.abs(seed) % candidates.length];
       return {entry:chosen,score:bestScore};
+    }
+
+    function composeLocalizedReply(topic, lang){
+      const p=personaPack(lang);
+      if(!p) return composeTopicReply(topic);
+      const G=window.SERENIA_I18N && window.SERENIA_I18N.topicGuidance && window.SERENIA_I18N.topicGuidance[lang];
+      const guidance=(G && (G[topic.id] || G.default)) || [];
+      const parts=[
+        pick(p.hello,1),
+        guidance[0] || "",
+        pick(p.comfort,2),
+        guidance[1] || "",
+        ((state.turnCount||0)%2===0 ? pick(p.challenge,3) : ""),
+        guidance[2] || "",
+        ((state.turnCount||0)%3===0 ? pick(p.spiritual,4) : ""),
+        pick(p.ask,5)
+      ].filter(Boolean);
+      return parts.join("\n\n");
     }
 
     function makeWarmer(text){
@@ -626,20 +718,36 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
     }
 
     async function replyTo(text){
-      const emergency = detectEmergency(text);
-      if(emergency) return {...crisisReply(emergency),crisis:true};
+      const lang = detectLanguage(text);
+      document.documentElement.lang = lang;
 
-      const intent = conversationalIntent(text);
-      if(intent) return {text:makeWarmer(intent)};
+      const emergency = detectEmergency(text,lang);
+      if(emergency) return {...crisisReply(emergency,lang),crisis:true};
 
-      const rankedTopics = detectTopics(text,2);
+      const intent = conversationalIntent(text,lang);
+      if(intent){
+        return {text: lang==="fr" ? makeWarmer(intent) : intent};
+      }
+
+      const rankedTopics = detectTopics(text,2,lang);
       const topic = rankedTopics.length ? rankedTopics[0].topic : null;
       const domainIds = rankedTopics.map(x => x.topic.id);
+
+      // The large 10M domain library is currently French.
+      // English/German use their native language core until their large domain packs are connected.
+      if(lang !== "fr"){
+        if(topic){
+          state.lastTopic=topic.id;
+          saveState();
+          return {text:composeLocalizedReply(topic,lang)};
+        }
+        const p=personaPack(lang);
+        return {text:p ? p.fallback : "Tell me a little more."};
+      }
 
       if(domainIds.length){
         await Promise.all(domainIds.map(loadDomain));
       }
-
       const matched = libraryMatch(text,domainIds);
 
       if(matched && (!topic || matched.entry.domain === topic.id || matched.score >= 10)){
