@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#8068d8">
-  <meta name="serenia-engine" content="500m-ready-ui-fr-en-de-v4">
+  <meta name="serenia-engine" content="500m-ready-ui-orb-v5">
   <title>SERENIA — Ton havre de paix intérieur</title>
   <meta name="description" content="SERENIA est un espace d'écoute et de soutien émotionnel pour mettre des mots sur ce que tu traverses.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -150,6 +150,173 @@
       font-size:15px;
       line-height:1.6;
     }
+    .serenia-presence{
+      position:relative;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      padding:18px 20px 10px;
+      min-height:158px;
+      overflow:hidden;
+      border-bottom:1px solid var(--line);
+      background:
+        radial-gradient(circle at 50% 48%, rgba(126,104,216,.11), transparent 31%),
+        radial-gradient(circle at 42% 40%, rgba(216,134,168,.08), transparent 27%);
+    }
+    .presence-stage{
+      position:relative;
+      width:118px;
+      height:118px;
+      display:grid;
+      place-items:center;
+      filter:drop-shadow(0 14px 28px rgba(91,68,157,.18));
+    }
+    .presence-ring,
+    .presence-orb,
+    .presence-glow,
+    .presence-core{
+      position:absolute;
+      border-radius:50%;
+      pointer-events:none;
+    }
+    .presence-ring{
+      inset:4px;
+      border:1px solid rgba(116,95,200,.16);
+      opacity:.72;
+      animation:ringBreath 5.2s ease-in-out infinite;
+    }
+    .presence-ring.r2{
+      inset:-7px;
+      border-color:rgba(216,134,168,.12);
+      animation-delay:-1.6s;
+      animation-duration:6.4s;
+    }
+    .presence-ring.r3{
+      inset:-18px;
+      border-color:rgba(112,160,226,.10);
+      animation-delay:-3.1s;
+      animation-duration:7.2s;
+    }
+    .presence-glow{
+      width:88px;height:88px;
+      background:
+        radial-gradient(circle at 38% 32%,rgba(255,255,255,.95),rgba(255,255,255,.18) 16%,transparent 35%),
+        radial-gradient(circle at 55% 58%,rgba(131,112,219,.50),rgba(216,134,168,.28) 42%,rgba(104,154,224,.18) 64%,transparent 76%);
+      filter:blur(12px);
+      animation:orbFloat 5.6s ease-in-out infinite;
+    }
+    .presence-orb{
+      width:68px;height:68px;
+      overflow:hidden;
+      background:
+        radial-gradient(circle at 33% 27%,rgba(255,255,255,.95),rgba(255,255,255,.34) 14%,transparent 29%),
+        radial-gradient(circle at 62% 65%,rgba(109,86,194,.88),rgba(155,121,219,.74) 34%,rgba(211,131,177,.64) 58%,rgba(116,173,229,.55) 78%,rgba(255,255,255,.24) 100%);
+      border:1px solid rgba(255,255,255,.74);
+      box-shadow:
+        inset -8px -10px 18px rgba(72,52,139,.18),
+        inset 7px 8px 15px rgba(255,255,255,.28),
+        0 0 28px rgba(119,94,205,.28),
+        0 0 55px rgba(205,137,180,.16);
+      animation:orbFloat 5.6s ease-in-out infinite;
+    }
+    .presence-orb::before,
+    .presence-orb::after{
+      content:"";
+      position:absolute;
+      border-radius:50%;
+      filter:blur(7px);
+      opacity:.75;
+      mix-blend-mode:screen;
+    }
+    .presence-orb::before{
+      width:54px;height:20px;left:8px;top:18px;
+      background:linear-gradient(90deg,transparent,rgba(255,255,255,.68),transparent);
+      transform:rotate(-18deg);
+      animation:orbSweep 4.4s linear infinite;
+    }
+    .presence-orb::after{
+      width:22px;height:58px;right:11px;top:6px;
+      background:linear-gradient(180deg,transparent,rgba(134,205,255,.52),transparent);
+      transform:rotate(24deg);
+      animation:orbSweep 5.2s linear reverse infinite;
+    }
+    .presence-core{
+      width:12px;height:12px;
+      background:rgba(255,255,255,.96);
+      box-shadow:0 0 12px rgba(255,255,255,.9),0 0 26px rgba(127,101,219,.78);
+      animation:corePulse 2.8s ease-in-out infinite;
+    }
+    .presence-waves{
+      position:absolute;
+      inset:auto 0 -4px;
+      height:31px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:3px;
+      opacity:.48;
+      transition:.25s ease;
+    }
+    .presence-waves i{
+      display:block;
+      width:3px;
+      height:6px;
+      border-radius:99px;
+      background:linear-gradient(180deg,#8c78d8,#cf8bad);
+      transform-origin:center;
+      animation:waveIdle 2.1s ease-in-out infinite;
+    }
+    .presence-waves i:nth-child(2){animation-delay:-.22s}
+    .presence-waves i:nth-child(3){animation-delay:-.44s}
+    .presence-waves i:nth-child(4){animation-delay:-.66s}
+    .presence-waves i:nth-child(5){animation-delay:-.88s}
+    .presence-waves i:nth-child(6){animation-delay:-1.10s}
+    .presence-waves i:nth-child(7){animation-delay:-1.32s}
+    .presence-waves i:nth-child(8){animation-delay:-1.54s}
+    .presence-waves i:nth-child(9){animation-delay:-1.76s}
+    .presence-status{
+      margin-top:13px;
+      min-height:18px;
+      color:#837b98;
+      font-size:11px;
+      letter-spacing:.02em;
+      text-align:center;
+      transition:.2s ease;
+    }
+    .serenia-presence[data-state="listening"] .presence-ring{
+      animation-duration:1.35s;
+      border-color:rgba(201,82,136,.25);
+    }
+    .serenia-presence[data-state="listening"] .presence-orb{
+      box-shadow:inset -8px -10px 18px rgba(72,52,139,.16),0 0 34px rgba(210,106,156,.38),0 0 70px rgba(128,109,219,.22);
+      animation-duration:2s;
+    }
+    .serenia-presence[data-state="listening"] .presence-waves{opacity:.95}
+    .serenia-presence[data-state="listening"] .presence-waves i{animation:waveListen .68s ease-in-out infinite}
+    .serenia-presence[data-state="thinking"] .presence-ring{
+      border-style:dashed;
+      animation:spinRing 4s linear infinite;
+    }
+    .serenia-presence[data-state="thinking"] .presence-ring.r2{animation-direction:reverse;animation-duration:5.7s}
+    .serenia-presence[data-state="thinking"] .presence-core{animation-duration:.9s}
+    .serenia-presence[data-state="speaking"] .presence-waves{opacity:.92}
+    .serenia-presence[data-state="speaking"] .presence-waves i{animation:waveSpeak .48s ease-in-out infinite}
+    .serenia-presence[data-state="speaking"] .presence-orb{animation-duration:1.8s}
+    .serenia-presence[data-state="calm"] .presence-ring{animation-duration:8s;opacity:.42}
+    .serenia-presence[data-state="calm"] .presence-waves{opacity:.25}
+    @keyframes orbFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-4px) scale(1.025)}}
+    @keyframes ringBreath{0%,100%{transform:scale(.94);opacity:.32}50%{transform:scale(1.06);opacity:.72}}
+    @keyframes corePulse{0%,100%{transform:scale(.82);opacity:.7}50%{transform:scale(1.22);opacity:1}}
+    @keyframes orbSweep{0%{transform:translateX(-8px) rotate(-18deg)}50%{transform:translateX(8px) rotate(8deg)}100%{transform:translateX(-8px) rotate(-18deg)}}
+    @keyframes waveIdle{0%,100%{height:5px;opacity:.35}50%{height:11px;opacity:.75}}
+    @keyframes waveListen{0%,100%{height:5px}50%{height:24px}}
+    @keyframes waveSpeak{0%,100%{height:6px}50%{height:22px}}
+    @keyframes spinRing{to{transform:rotate(360deg)}}
+    @media(prefers-reduced-motion:reduce){
+      .presence-ring,.presence-glow,.presence-orb,.presence-core,.presence-waves i{animation:none!important}
+    }
+
     .topics{
       display:flex;gap:8px;overflow-x:auto;
       padding:15px 28px 13px;
@@ -297,6 +464,10 @@
       .brand h1{font-size:25px}.logo{width:42px;height:42px}
       .card{border-radius:26px 26px 0 0;min-height:calc(100vh - 74px);box-shadow:none;border-left:0;border-right:0;border-bottom:0}
       .intro{padding:27px 20px 18px}.intro p{font-size:14px}
+      .serenia-presence{min-height:138px;padding:14px 16px 8px}
+      .presence-stage{width:100px;height:100px}
+      .presence-orb{width:60px;height:60px}
+      .presence-glow{width:78px;height:78px}
       .topics{padding:12px 18px}
       .conversation{padding:20px 17px 10px;max-height:none}
       .message{max-width:88%;font-size:14px}
@@ -329,6 +500,21 @@
       <section class="intro">
         <h2 id="introTitle">Dépose ce qui <em>pèse.</em></h2>
         <p id="introText">Rupture, solitude, peur, conflit, pensées en boucle… Écris comme ça vient. SERENIA t’aide à mettre des mots, prendre du recul et trouver une prochaine petite étape.</p>
+      </section>
+
+      <section class="serenia-presence" id="sereniaPresence" data-state="idle" aria-live="polite">
+        <div class="presence-stage" aria-hidden="true">
+          <span class="presence-ring r1"></span>
+          <span class="presence-ring r2"></span>
+          <span class="presence-ring r3"></span>
+          <span class="presence-glow"></span>
+          <span class="presence-orb"></span>
+          <span class="presence-core"></span>
+          <span class="presence-waves">
+            <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+          </span>
+        </div>
+        <div class="presence-status" id="presenceStatus">Je suis là.</div>
       </section>
 
       <div class="topics" id="topics" aria-label="Sujets fréquents"></div>
@@ -385,6 +571,8 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
     const localNote = document.getElementById("localNote");
     const siteFooter = document.getElementById("siteFooter");
     const languageSwitcher = document.getElementById("languageSwitcher");
+    const sereniaPresence = document.getElementById("sereniaPresence");
+    const presenceStatus = document.getElementById("presenceStatus");
     const STORAGE_KEY = "serenia_conversation_v1";
     const STATE_KEY = "serenia_state_v1";
     const UI_LANG_KEY = "serenia_ui_language_v1";
@@ -397,6 +585,7 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
         title:"SERENIA — Ton havre de paix intérieur",
         description:"SERENIA est un espace d'écoute et de soutien émotionnel pour mettre des mots sur ce que tu traverses.",
         tagline:"Ton havre de paix intérieur",
+        presence:{idle:"Je suis là.",listening:"Je t’écoute…",thinking:"Je réfléchis avec toi…",speaking:"Je suis avec toi.",calm:"On respire un peu."},
         privacy:"🔒 Respect de ta vie privée",
         introTitle:'Dépose ce qui <em>pèse.</em>',
         introText:"Rupture, solitude, peur, conflit, pensées en boucle… Écris comme ça vient. SERENIA t’aide à mettre des mots, prendre du recul et trouver une prochaine petite étape.",
@@ -433,6 +622,7 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
         title:"SERENIA — Your inner haven",
         description:"SERENIA is a space for emotional support, helping you put words to what you are going through.",
         tagline:"Your inner haven",
+        presence:{idle:"I’m here.",listening:"I’m listening…",thinking:"Thinking this through with you…",speaking:"I’m with you.",calm:"Let’s slow it down."},
         privacy:"🔒 Your privacy matters",
         introTitle:'Put down what <em>weighs on you.</em>',
         introText:"Breakups, loneliness, fear, conflict, thoughts going in circles… Write it exactly as it comes. SERENIA helps you put things into words, step back and find one small next step.",
@@ -469,6 +659,7 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
         title:"SERENIA — Dein innerer Zufluchtsort",
         description:"SERENIA ist ein Ort für emotionale Unterstützung, an dem du Worte für das finden kannst, was du gerade durchmachst.",
         tagline:"Dein innerer Zufluchtsort",
+        presence:{idle:"Ich bin da.",listening:"Ich höre dir zu…",thinking:"Ich denke mit dir nach…",speaking:"Ich bin bei dir.",calm:"Wir werden kurz ruhig."},
         privacy:"🔒 Deine Privatsphäre zählt",
         introTitle:'Leg ab, was dich <em>belastet.</em>',
         introText:"Trennung, Einsamkeit, Angst, Konflikte, kreisende Gedanken… Schreib einfach, wie es kommt. SERENIA hilft dir, Worte zu finden, Abstand zu gewinnen und einen kleinen nächsten Schritt zu sehen.",
@@ -552,6 +743,7 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
       localNote.textContent=t.localNote;
       clearBtn.textContent=t.clear;
       siteFooter.innerHTML=t.footer;
+      setPresenceState(sereniaPresence.dataset.state || "idle");
 
       languageSwitcher.querySelectorAll("[data-lang]").forEach(btn=>{
         const active=btn.dataset.lang===lang;
@@ -568,6 +760,21 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
 
       if(save){
         try{localStorage.setItem(UI_LANG_KEY,lang);}catch(e){}
+      }
+    }
+
+    let presenceTimer = null;
+
+    function setPresenceState(next="idle",autoReturn=0){
+      const allowed=["idle","listening","thinking","speaking","calm"];
+      const stateName=allowed.includes(next)?next:"idle";
+      sereniaPresence.dataset.state=stateName;
+      const copy=(UI[uiLang]||UI.en).presence || {};
+      presenceStatus.textContent=copy[stateName] || copy.idle || "";
+      if(presenceTimer) clearTimeout(presenceTimer);
+      presenceTimer=null;
+      if(autoReturn>0){
+        presenceTimer=setTimeout(()=>setPresenceState("idle"),autoReturn);
       }
     }
 
@@ -1028,11 +1235,13 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
       saveState();
 
       typing.classList.add("show");
+      setPresenceState("thinking");
       conversation.scrollTop = conversation.scrollHeight;
       await new Promise(r => setTimeout(r, 380 + Math.min(text.length,220) * 1.2));
       typing.classList.remove("show");
 
       const response = await replyTo(text);
+      setPresenceState(response.crisis ? "calm" : "speaking", response.crisis ? 5000 : 3200);
       addMessage("bot",response.text,{crisis:response.crisis,resources:response.resources});
       saveTurn("bot",response.text);
     }
@@ -1054,6 +1263,7 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
       recognition.maxAlternatives = 1;
       voiceBtn.classList.add("listening");
       voiceBtn.textContent = "●";
+      setPresenceState("listening");
       recognition.start();
 
       recognition.onresult = e => {
@@ -1062,11 +1272,13 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
         sendMessage();
       };
       recognition.onerror = () => {
+        setPresenceState("calm",2200);
         addMessage("bot",(UI[uiLang]||UI.en).voiceError);
       };
       recognition.onend = () => {
         voiceBtn.classList.remove("listening");
         voiceBtn.textContent = "🎤";
+        if(sereniaPresence.dataset.state === "listening") setPresenceState("idle");
       };
     }
 
@@ -1081,6 +1293,7 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
       state.turnCount = 0;
       state.lastTopic = null;
       conversation.querySelectorAll(".message").forEach(x=>x.remove());
+      setPresenceState("calm",2600);
       addMessage("bot",copy.cleared);
     }
 
@@ -1101,6 +1314,7 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
     });
 
     applyUiLanguage(uiLang,{save:false});
+    setPresenceState("idle");
     restoreConversation();
     input.focus();
   })();
