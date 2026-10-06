@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#8068d8">
-  <meta name="serenia-engine" content="500m-ready-ui-orb-v5">
+  <meta name="serenia-engine" content="voice-synthesis-fr-en-de-v6">
   <title>SERENIA — Ton havre de paix intérieur</title>
   <meta name="description" content="SERENIA est un espace d'écoute et de soutien émotionnel pour mettre des mots sur ce que tu traverses.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -426,6 +426,40 @@
       width:43px;height:43px;border-radius:14px;
       background:#f4f1fb;color:var(--purple-dark);font-size:18px;
     }
+    .icon-btn.speech-toggle{
+      font-size:17px;
+      background:#f8f6fd;
+    }
+    .icon-btn.speech-toggle.active{
+      color:#654eb7;
+      background:linear-gradient(145deg,#f1edff,#fceff6);
+      box-shadow:inset 0 0 0 1px rgba(116,95,200,.08);
+    }
+    .icon-btn.speech-toggle.muted{
+      color:#aaa3b5;
+      background:#f5f4f8;
+    }
+    .voice-hint{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:7px;
+      margin-top:5px;
+      color:#91899f;
+      font-size:10px;
+      line-height:1.35;
+      text-align:center;
+    }
+    .voice-hint::before{
+      content:"";
+      width:18px;height:1px;
+      background:linear-gradient(90deg,transparent,rgba(116,95,200,.25));
+    }
+    .voice-hint::after{
+      content:"";
+      width:18px;height:1px;
+      background:linear-gradient(90deg,rgba(116,95,200,.25),transparent);
+    }
     .send-btn{
       min-width:48px;height:43px;border-radius:14px;
       background:linear-gradient(145deg,#8068d8,#6c54c0);
@@ -515,6 +549,7 @@
           </span>
         </div>
         <div class="presence-status" id="presenceStatus">Je suis là.</div>
+        <div class="voice-hint" id="voiceHint">Écris ou parle — je peux aussi te répondre à voix haute.</div>
       </section>
 
       <div class="topics" id="topics" aria-label="Sujets fréquents"></div>
@@ -532,6 +567,7 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
         <div class="composer">
           <textarea id="userInput" rows="1" maxlength="1400" placeholder="Exprime ce que tu ressens…" aria-label="Ton message"></textarea>
           <button class="icon-btn" id="voiceBtn" type="button" title="Parler" aria-label="Parler">🎤</button>
+          <button class="icon-btn speech-toggle active" id="soundBtn" type="button" title="Voix de SERENIA activée" aria-label="Voix de SERENIA activée" aria-pressed="true">🔊</button>
           <button class="send-btn" id="sendBtn" type="button" title="Envoyer" aria-label="Envoyer">➜</button>
         </div>
         <div class="composer-meta">
@@ -553,6 +589,7 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
   <script src="serenia-persona.js"></script>
   <script src="serenia-i18n.js"></script>
   <script src="serenia-remote.js"></script>
+  <script src="serenia-speech.js"></script>
   <script>
   (() => {
     "use strict";
@@ -560,6 +597,8 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
     const input = document.getElementById("userInput");
     const sendBtn = document.getElementById("sendBtn");
     const voiceBtn = document.getElementById("voiceBtn");
+    const soundBtn = document.getElementById("soundBtn");
+    const voiceHint = document.getElementById("voiceHint");
     const clearBtn = document.getElementById("clearBtn");
     const conversation = document.getElementById("conversation");
     const typing = document.getElementById("typing");
@@ -576,6 +615,7 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
     const STORAGE_KEY = "serenia_conversation_v1";
     const STATE_KEY = "serenia_state_v1";
     const UI_LANG_KEY = "serenia_ui_language_v1";
+    const SPEECH_KEY = "serenia_speech_enabled_v1";
 
     const state = loadState();
     let turns = loadTurns();
@@ -585,7 +625,11 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
         title:"SERENIA — Ton havre de paix intérieur",
         description:"SERENIA est un espace d'écoute et de soutien émotionnel pour mettre des mots sur ce que tu traverses.",
         tagline:"Ton havre de paix intérieur",
-        presence:{idle:"Je suis là.",listening:"Je t’écoute…",thinking:"Je réfléchis avec toi…",speaking:"Je suis avec toi.",calm:"On respire un peu."},
+        presence:{idle:"Je suis là.",listening:"Je t’écoute…",thinking:"Je réfléchis avec toi…",speaking:"Je te parle…",calm:"On respire un peu."},
+        voiceHint:"Écris ou parle — je peux aussi te répondre à voix haute.",
+        soundOn:"Voix de SERENIA activée",
+        soundOff:"Voix de SERENIA coupée",
+        speechUnavailable:"La synthèse vocale n’est pas disponible dans ce navigateur.",
         privacy:"🔒 Respect de ta vie privée",
         introTitle:'Dépose ce qui <em>pèse.</em>',
         introText:"Rupture, solitude, peur, conflit, pensées en boucle… Écris comme ça vient. SERENIA t’aide à mettre des mots, prendre du recul et trouver une prochaine petite étape.",
@@ -622,7 +666,11 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
         title:"SERENIA — Your inner haven",
         description:"SERENIA is a space for emotional support, helping you put words to what you are going through.",
         tagline:"Your inner haven",
-        presence:{idle:"I’m here.",listening:"I’m listening…",thinking:"Thinking this through with you…",speaking:"I’m with you.",calm:"Let’s slow it down."},
+        presence:{idle:"I’m here.",listening:"I’m listening…",thinking:"Thinking this through with you…",speaking:"I’m speaking to you…",calm:"Let’s slow it down."},
+        voiceHint:"Type or talk — I can answer out loud too.",
+        soundOn:"SERENIA voice on",
+        soundOff:"SERENIA voice off",
+        speechUnavailable:"Speech synthesis isn’t available in this browser.",
         privacy:"🔒 Your privacy matters",
         introTitle:'Put down what <em>weighs on you.</em>',
         introText:"Breakups, loneliness, fear, conflict, thoughts going in circles… Write it exactly as it comes. SERENIA helps you put things into words, step back and find one small next step.",
@@ -659,7 +707,11 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
         title:"SERENIA — Dein innerer Zufluchtsort",
         description:"SERENIA ist ein Ort für emotionale Unterstützung, an dem du Worte für das finden kannst, was du gerade durchmachst.",
         tagline:"Dein innerer Zufluchtsort",
-        presence:{idle:"Ich bin da.",listening:"Ich höre dir zu…",thinking:"Ich denke mit dir nach…",speaking:"Ich bin bei dir.",calm:"Wir werden kurz ruhig."},
+        presence:{idle:"Ich bin da.",listening:"Ich höre dir zu…",thinking:"Ich denke mit dir nach…",speaking:"Ich spreche mit dir…",calm:"Wir werden kurz ruhig."},
+        voiceHint:"Schreib oder sprich — ich kann dir auch laut antworten.",
+        soundOn:"SERENIA-Stimme an",
+        soundOff:"SERENIA-Stimme aus",
+        speechUnavailable:"Die Sprachsynthese ist in diesem Browser nicht verfügbar.",
         privacy:"🔒 Deine Privatsphäre zählt",
         introTitle:'Leg ab, was dich <em>belastet.</em>',
         introText:"Trennung, Einsamkeit, Angst, Konflikte, kreisende Gedanken… Schreib einfach, wie es kommt. SERENIA hilft dir, Worte zu finden, Abstand zu gewinnen und einen kleinen nächsten Schritt zu sehen.",
@@ -714,6 +766,65 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
 
     let uiLang = storedUiLanguage() || browserUiLanguage();
 
+    function loadSpeechPreference(){
+      try{
+        const saved=localStorage.getItem(SPEECH_KEY);
+        return saved === null ? true : saved === "true";
+      }catch(e){ return true; }
+    }
+
+    let speechEnabled = loadSpeechPreference();
+
+    function updateSpeechButton(){
+      const copy=UI[uiLang] || UI.en;
+      const supported=Boolean(window.SERENIA_SPEECH && window.SERENIA_SPEECH.isSupported());
+      if(!supported) speechEnabled=false;
+      soundBtn.textContent=speechEnabled ? "🔊" : "🔇";
+      soundBtn.classList.toggle("active",speechEnabled);
+      soundBtn.classList.toggle("muted",!speechEnabled);
+      soundBtn.setAttribute("aria-pressed",speechEnabled ? "true" : "false");
+      const label=supported ? (speechEnabled ? copy.soundOn : copy.soundOff) : copy.speechUnavailable;
+      soundBtn.title=label;
+      soundBtn.setAttribute("aria-label",label);
+    }
+
+    function setSpeechEnabled(enabled,{save=true}={}){
+      speechEnabled=Boolean(enabled && window.SERENIA_SPEECH && window.SERENIA_SPEECH.isSupported());
+      if(!speechEnabled && window.SERENIA_SPEECH) window.SERENIA_SPEECH.cancel();
+      if(save){
+        try{localStorage.setItem(SPEECH_KEY,String(speechEnabled));}catch(e){}
+      }
+      updateSpeechButton();
+      if(!speechEnabled && sereniaPresence.dataset.state === "speaking"){
+        setPresenceState("idle");
+      }
+    }
+
+    function toggleSpeech(){
+      if(!(window.SERENIA_SPEECH && window.SERENIA_SPEECH.isSupported())){
+        const copy=UI[uiLang] || UI.en;
+        addMessage("bot",copy.speechUnavailable);
+        setSpeechEnabled(false);
+        return;
+      }
+      setSpeechEnabled(!speechEnabled);
+    }
+
+    function speakReply(text,lang,isCrisis=false){
+      if(!speechEnabled || !(window.SERENIA_SPEECH && window.SERENIA_SPEECH.isSupported())){
+        setPresenceState(isCrisis ? "calm" : "speaking",isCrisis ? 5000 : 2600);
+        return false;
+      }
+
+      return window.SERENIA_SPEECH.speak(text,lang,{
+        rate:isCrisis ? 0.90 : 0.94,
+        pitch:1.01,
+        onstart:()=>setPresenceState("speaking"),
+        onend:()=>setPresenceState(isCrisis ? "calm" : "idle",isCrisis ? 3600 : 0),
+        onerror:()=>setPresenceState(isCrisis ? "calm" : "idle",isCrisis ? 3200 : 0)
+      });
+    }
+
     function speechLocale(){
       const browser=(navigator.language||"").toLowerCase();
       if(browser.startsWith(uiLang)) return navigator.language;
@@ -743,7 +854,9 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
       localNote.textContent=t.localNote;
       clearBtn.textContent=t.clear;
       siteFooter.innerHTML=t.footer;
+      voiceHint.textContent=t.voiceHint;
       setPresenceState(sereniaPresence.dataset.state || "idle");
+      updateSpeechButton();
 
       languageSwitcher.querySelectorAll("[data-lang]").forEach(btn=>{
         const active=btn.dataset.lang===lang;
@@ -1226,6 +1339,8 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
     async function sendMessage(){
       const text = input.value.trim();
       if(!text) return;
+      if(window.SERENIA_SPEECH) window.SERENIA_SPEECH.cancel();
+      const responseLang = detectLanguage(text);
       input.value = "";
       autoResize();
 
@@ -1241,9 +1356,9 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
       typing.classList.remove("show");
 
       const response = await replyTo(text);
-      setPresenceState(response.crisis ? "calm" : "speaking", response.crisis ? 5000 : 3200);
       addMessage("bot",response.text,{crisis:response.crisis,resources:response.resources});
       saveTurn("bot",response.text);
+      speakReply(response.text,responseLang,Boolean(response.crisis));
     }
 
     function autoResize(){
@@ -1252,6 +1367,7 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
     }
 
     function startVoice(){
+      if(window.SERENIA_SPEECH) window.SERENIA_SPEECH.cancel();
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if(!SpeechRecognition){
         addMessage("bot",(UI[uiLang]||UI.en).voiceUnavailable);
@@ -1283,6 +1399,7 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
     }
 
     function clearConversation(){
+      if(window.SERENIA_SPEECH) window.SERENIA_SPEECH.cancel();
       const copy=UI[uiLang] || UI.en;
       if(!confirm(copy.confirmClear)) return;
       try{
@@ -1306,14 +1423,18 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
     });
     sendBtn.addEventListener("click",sendMessage);
     voiceBtn.addEventListener("click",startVoice);
+    soundBtn.addEventListener("click",toggleSpeech);
     clearBtn.addEventListener("click",clearConversation);
     languageSwitcher.addEventListener("click",e=>{
       const btn=e.target.closest("[data-lang]");
       if(!btn) return;
+      if(window.SERENIA_SPEECH) window.SERENIA_SPEECH.cancel();
       applyUiLanguage(btn.dataset.lang);
     });
 
     applyUiLanguage(uiLang,{save:false});
+    setSpeechEnabled(speechEnabled,{save:false});
+    if(window.SERENIA_SPEECH) window.SERENIA_SPEECH.refreshVoices();
     setPresenceState("idle");
     restoreConversation();
     input.focus();
