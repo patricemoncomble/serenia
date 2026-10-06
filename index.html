@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#8068d8">
-  <meta name="serenia-engine" content="voice-synthesis-fr-en-de-v6">
+  <meta name="serenia-engine" content="voice-mic-toggle-fix-v7">
   <title>SERENIA — Ton havre de paix intérieur</title>
   <meta name="description" content="SERENIA est un espace d'écoute et de soutien émotionnel pour mettre des mots sur ce que tu traverses.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -421,6 +421,9 @@
     .icon-btn,.send-btn{
       border:0;cursor:pointer;display:grid;place-items:center;
       transition:.2s ease;
+      touch-action:manipulation;
+      user-select:none;
+      -webkit-user-select:none;
     }
     .icon-btn{
       width:43px;height:43px;border-radius:14px;
@@ -566,7 +569,7 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
       <div class="composer-wrap">
         <div class="composer">
           <textarea id="userInput" rows="1" maxlength="1400" placeholder="Exprime ce que tu ressens…" aria-label="Ton message"></textarea>
-          <button class="icon-btn" id="voiceBtn" type="button" title="Parler" aria-label="Parler">🎤</button>
+          <button class="icon-btn" id="voiceBtn" type="button" title="Parler" aria-label="Parler" aria-pressed="false">🎤</button>
           <button class="icon-btn speech-toggle active" id="soundBtn" type="button" title="Voix de SERENIA activée" aria-label="Voix de SERENIA activée" aria-pressed="true">🔊</button>
           <button class="send-btn" id="sendBtn" type="button" title="Envoyer" aria-label="Envoyer">➜</button>
         </div>
@@ -646,6 +649,14 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
         cleared:"Conversation effacée. 🌿\n\nOn repart de zéro. Qu’est-ce qui te pèse aujourd’hui ?",
         voiceUnavailable:"La reconnaissance vocale n’est pas disponible dans ce navigateur. Tu peux m’écrire ici.",
         voiceError:"Je n’ai pas réussi à entendre correctement. Tu peux réessayer ou écrire ton message.",
+        micStarting:"J’ouvre le micro…",
+        micListening:"Je t’écoute. Parle normalement — un clic suffit.",
+        micStop:"Clique à nouveau sur le micro pour arrêter.",
+        micDenied:"Le micro est bloqué dans ton navigateur. Autorise le micro pour ce site, puis réessaie.",
+        micMissing:"Je ne trouve aucun microphone disponible sur cet appareil.",
+        micNoSpeech:"Je n’ai entendu aucune parole. Réessaie en parlant après que le micro passe en mode écoute.",
+        micNetwork:"Le service de reconnaissance vocale du navigateur n’a pas répondu. Réessaie, ou utilise Chrome/Edge à jour.",
+        micUnsupported:"Ce navigateur ne prend pas en charge correctement la reconnaissance vocale. Essaie Chrome ou Edge.",
         footer:"<strong>SERENIA est un outil de soutien émotionnel, pas un professionnel de santé.</strong> En cas de danger immédiat, appelle les services d’urgence de ton pays (112 dans l’Union européenne).",
         chips:{
           rupture:"💔 Rupture",ghosting:"🌫️ Silence / ghosting",solitude:"🌙 Solitude",anxiete:"🫧 Anxiété",
@@ -687,6 +698,14 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
         cleared:"Conversation cleared. 🌿\n\nFresh start. What’s weighing on you today?",
         voiceUnavailable:"Voice recognition isn’t available in this browser. You can type to me here.",
         voiceError:"I couldn’t hear you clearly. Try again or type your message.",
+        micStarting:"Opening the microphone…",
+        micListening:"I’m listening. Speak normally — one click is enough.",
+        micStop:"Click the microphone again to stop.",
+        micDenied:"The microphone is blocked in your browser. Allow microphone access for this site, then try again.",
+        micMissing:"I can’t find an available microphone on this device.",
+        micNoSpeech:"I didn’t hear any speech. Try again and speak after the microphone enters listening mode.",
+        micNetwork:"The browser speech-recognition service didn’t respond. Try again, or use an up-to-date Chrome/Edge.",
+        micUnsupported:"This browser does not properly support speech recognition. Try Chrome or Edge.",
         footer:"<strong>SERENIA is an emotional-support tool, not a healthcare professional.</strong> If you are in immediate danger, call your local emergency services (112 in the European Union).",
         chips:{
           rupture:"💔 Breakup",ghosting:"🌫️ Silence / ghosting",solitude:"🌙 Loneliness",anxiete:"🫧 Anxiety",
@@ -728,6 +747,14 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
         cleared:"Gespräch gelöscht. 🌿\n\nWir fangen neu an. Was belastet dich heute?",
         voiceUnavailable:"Die Spracherkennung ist in diesem Browser nicht verfügbar. Du kannst mir hier schreiben.",
         voiceError:"Ich konnte dich nicht richtig verstehen. Versuch es noch einmal oder schreib deine Nachricht.",
+        micStarting:"Ich öffne das Mikrofon…",
+        micListening:"Ich höre dir zu. Sprich ganz normal — ein Klick genügt.",
+        micStop:"Klicke erneut auf das Mikrofon, um zu stoppen.",
+        micDenied:"Das Mikrofon ist im Browser blockiert. Erlaube den Mikrofonzugriff für diese Seite und versuche es erneut.",
+        micMissing:"Ich finde auf diesem Gerät kein verfügbares Mikrofon.",
+        micNoSpeech:"Ich habe keine Sprache gehört. Versuche es erneut und sprich, sobald der Hörmodus aktiv ist.",
+        micNetwork:"Der Spracherkennungsdienst des Browsers hat nicht geantwortet. Versuche es erneut oder nutze aktuelles Chrome/Edge.",
+        micUnsupported:"Dieser Browser unterstützt die Spracherkennung nicht zuverlässig. Versuche Chrome oder Edge.",
         footer:"<strong>SERENIA ist ein Tool zur emotionalen Unterstützung und kein medizinisches Fachpersonal.</strong> Bei unmittelbarer Gefahr ruf den örtlichen Notruf an (112 in der Europäischen Union).",
         chips:{
           rupture:"💔 Trennung",ghosting:"🌫️ Schweigen / Ghosting",solitude:"🌙 Einsamkeit",anxiete:"🫧 Angst",
@@ -1366,39 +1393,148 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
       input.style.height = Math.min(input.scrollHeight,130) + "px";
     }
 
-    function startVoice(){
-      if(window.SERENIA_SPEECH) window.SERENIA_SPEECH.cancel();
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if(!SpeechRecognition){
-        addMessage("bot",(UI[uiLang]||UI.en).voiceUnavailable);
+    let activeRecognition = null;
+    let micListening = false;
+    let micTranscript = "";
+
+    function resetMicUi(){
+      micListening=false;
+      activeRecognition=null;
+      voiceBtn.classList.remove("listening");
+      voiceBtn.textContent="🎤";
+      voiceBtn.setAttribute("aria-pressed","false");
+      if(sereniaPresence.dataset.state === "listening") setPresenceState("idle");
+    }
+
+    function micErrorMessage(code){
+      const copy=UI[uiLang] || UI.en;
+      if(code==="not-allowed" || code==="service-not-allowed" || code==="permission-denied") return copy.micDenied;
+      if(code==="audio-capture" || code==="not-found" || code==="devices-not-found") return copy.micMissing;
+      if(code==="no-speech") return copy.micNoSpeech;
+      if(code==="network") return copy.micNetwork;
+      return copy.voiceError;
+    }
+
+    async function requestMicrophonePermission(){
+      if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return true;
+      const stream=await navigator.mediaDevices.getUserMedia({
+        audio:{
+          echoCancellation:true,
+          noiseSuppression:true,
+          autoGainControl:true
+        }
+      });
+      stream.getTracks().forEach(track=>track.stop());
+      return true;
+    }
+
+    async function startVoice(){
+      const copy=UI[uiLang] || UI.en;
+
+      // True toggle: one click starts, the next click stops.
+      if(activeRecognition && micListening){
+        try{ activeRecognition.stop(); }catch(e){}
         return;
       }
-      const recognition = new SpeechRecognition();
-      recognition.lang = speechLocale();
-      recognition.interimResults = false;
-      recognition.maxAlternatives = 1;
-      voiceBtn.classList.add("listening");
-      voiceBtn.textContent = "●";
-      setPresenceState("listening");
-      recognition.start();
 
-      recognition.onresult = e => {
-        input.value = e.results[0][0].transcript;
-        autoResize();
-        sendMessage();
-      };
-      recognition.onerror = () => {
+      if(window.SERENIA_SPEECH) window.SERENIA_SPEECH.cancel();
+
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if(!SpeechRecognition){
         setPresenceState("calm",2200);
-        addMessage("bot",(UI[uiLang]||UI.en).voiceError);
+        addMessage("bot",copy.micUnsupported || copy.voiceUnavailable);
+        return;
+      }
+
+      voiceHint.textContent=copy.micStarting;
+      setPresenceState("listening");
+      voiceBtn.classList.add("listening");
+      voiceBtn.textContent="●";
+      voiceBtn.setAttribute("aria-pressed","true");
+
+      try{
+        await requestMicrophonePermission();
+      }catch(err){
+        resetMicUi();
+        const code=(err && err.name === "NotAllowedError") ? "not-allowed"
+          : (err && err.name === "NotFoundError") ? "not-found"
+          : "audio-capture";
+        addMessage("bot",micErrorMessage(code));
+        voiceHint.textContent=copy.voiceHint;
+        return;
+      }
+
+      const recognition=new SpeechRecognition();
+      activeRecognition=recognition;
+      micTranscript="";
+
+      recognition.lang=speechLocale();
+      recognition.continuous=false;
+      recognition.interimResults=true;
+      recognition.maxAlternatives=1;
+
+      recognition.onstart=()=>{
+        micListening=true;
+        voiceHint.textContent=copy.micListening;
+        setPresenceState("listening");
       };
-      recognition.onend = () => {
-        voiceBtn.classList.remove("listening");
-        voiceBtn.textContent = "🎤";
-        if(sereniaPresence.dataset.state === "listening") setPresenceState("idle");
+
+      recognition.onaudiostart=()=>{
+        voiceHint.textContent=copy.micListening;
       };
+
+      recognition.onspeechstart=()=>{
+        presenceStatus.textContent=copy.presence.listening;
+      };
+
+      recognition.onresult=(event)=>{
+        let finalText="";
+        let interimText="";
+        for(let i=event.resultIndex;i<event.results.length;i++){
+          const piece=event.results[i][0]?.transcript || "";
+          if(event.results[i].isFinal) finalText += piece;
+          else interimText += piece;
+        }
+        if(finalText.trim()) micTranscript=(micTranscript+" "+finalText).trim();
+        const visible=(micTranscript+" "+interimText).trim();
+        if(visible){
+          input.value=visible;
+          autoResize();
+        }
+      };
+
+      recognition.onerror=(event)=>{
+        const code=event && event.error ? event.error : "unknown";
+        // "aborted" happens when the user deliberately stops listening.
+        if(code!=="aborted"){
+          setPresenceState("calm",2200);
+          addMessage("bot",micErrorMessage(code));
+        }
+      };
+
+      recognition.onend=()=>{
+        const spoken=(micTranscript || input.value || "").trim();
+        const hadSpeech=Boolean(spoken);
+        resetMicUi();
+        voiceHint.textContent=copy.voiceHint;
+        if(hadSpeech){
+          input.value=spoken;
+          autoResize();
+          sendMessage();
+        }
+      };
+
+      try{
+        recognition.start();
+      }catch(err){
+        resetMicUi();
+        voiceHint.textContent=copy.voiceHint;
+        addMessage("bot",copy.voiceError);
+      }
     }
 
     function clearConversation(){
+      if(activeRecognition){ try{activeRecognition.abort();}catch(e){} resetMicUi(); }
       if(window.SERENIA_SPEECH) window.SERENIA_SPEECH.cancel();
       const copy=UI[uiLang] || UI.en;
       if(!confirm(copy.confirmClear)) return;
@@ -1428,6 +1564,7 @@ Allez… qu’est-ce qui te pèse vraiment aujourd’hui ?</div>
     languageSwitcher.addEventListener("click",e=>{
       const btn=e.target.closest("[data-lang]");
       if(!btn) return;
+      if(activeRecognition){ try{activeRecognition.abort();}catch(e){} resetMicUi(); }
       if(window.SERENIA_SPEECH) window.SERENIA_SPEECH.cancel();
       applyUiLanguage(btn.dataset.lang);
     });
