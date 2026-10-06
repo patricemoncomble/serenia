@@ -7,6 +7,7 @@ window.SERENIA_SPEECH = (() => {
   let voices = [];
   let current = null;
   let speaking = false;
+  let generation = 0;
 
   function refreshVoices(){
     if(!synth) return [];
@@ -69,9 +70,38 @@ window.SERENIA_SPEECH = (() => {
       .trim();
   }
 
+  function splitForSpeech(text,max=230){
+    const sentences = text.match(/[^.!?…]+[.!?…]?/g) || [text];
+    const chunks=[];
+    let currentChunk="";
+    for(const raw of sentences){
+      const s=raw.trim();
+      if(!s) continue;
+      if((currentChunk+" "+s).trim().length <= max){
+        currentChunk=(currentChunk+" "+s).trim();
+      }else{
+        if(currentChunk) chunks.push(currentChunk);
+        if(s.length <= max){
+          currentChunk=s;
+        }else{
+          const words=s.split(/\s+/);
+          currentChunk="";
+          for(const w of words){
+            if((currentChunk+" "+w).trim().length > max){
+              if(currentChunk) chunks.push(currentChunk);
+              currentChunk=w;
+            }else currentChunk=(currentChunk+" "+w).trim();
+          }
+        }
+      }
+    }
+    if(currentChunk) chunks.push(currentChunk);
+    return chunks;
+  }
+
   function cancel(){
-    if(!synth) return;
-    synth.cancel();
+    generation++;
+    if(synth) synth.cancel();
     current = null;
     speaking = false;
   }
@@ -86,32 +116,49 @@ window.SERENIA_SPEECH = (() => {
     if(!spoken) return false;
 
     cancel();
+    const myGeneration=++generation;
+    const chunks=splitForSpeech(spoken);
+    const voice=bestVoice(lang);
+    let index=0;
+    let started=false;
 
-    const utterance = new SpeechSynthesisUtterance(spoken);
-    const voice = bestVoice(lang);
-    if(voice) utterance.voice = voice;
-    utterance.lang = voice?.lang || localeFor(lang);
-    utterance.rate = typeof opts.rate === "number" ? opts.rate : 0.94;
-    utterance.pitch = typeof opts.pitch === "number" ? opts.pitch : 1.02;
-    utterance.volume = typeof opts.volume === "number" ? opts.volume : 1;
+    const next=()=>{
+      if(myGeneration!==generation) return;
+      if(index>=chunks.length){
+        speaking=false;
+        current=null;
+        if(opts.onend) opts.onend();
+        return;
+      }
 
-    utterance.onstart = () => {
-      speaking = true;
-      if(opts.onstart) opts.onstart(voice);
-    };
-    utterance.onend = () => {
-      speaking = false;
-      current = null;
-      if(opts.onend) opts.onend();
-    };
-    utterance.onerror = (e) => {
-      speaking = false;
-      current = null;
-      if(opts.onerror) opts.onerror(e);
+      const utterance=new SpeechSynthesisUtterance(chunks[index++]);
+      if(voice) utterance.voice=voice;
+      utterance.lang=voice?.lang || localeFor(lang);
+      utterance.rate=typeof opts.rate==="number" ? opts.rate : 0.94;
+      utterance.pitch=typeof opts.pitch==="number" ? opts.pitch : 1.02;
+      utterance.volume=typeof opts.volume==="number" ? opts.volume : 1;
+
+      utterance.onstart=()=>{
+        if(myGeneration!==generation) return;
+        speaking=true;
+        if(!started){
+          started=true;
+          if(opts.onstart) opts.onstart(voice);
+        }
+      };
+      utterance.onend=()=>next();
+      utterance.onerror=(e)=>{
+        if(myGeneration!==generation) return;
+        speaking=false;
+        current=null;
+        if(opts.onerror) opts.onerror(e);
+      };
+
+      current=utterance;
+      synth.speak(utterance);
     };
 
-    current = utterance;
-    synth.speak(utterance);
+    next();
     return true;
   }
 
